@@ -14,15 +14,17 @@ void setup() {
   pinMode(motorPin2, OUTPUT);
   pinMode(motorPin3, OUTPUT);
   pinMode(motorPin4, OUTPUT);
-}
 
-void loop() {
-  // Disable all motors
   digitalWrite(motorPin1, LOW);
   digitalWrite(motorPin2, LOW);
   digitalWrite(motorPin3, LOW);
   digitalWrite(motorPin4, LOW);
-  
+   
+}
+
+void loop() {
+  // Disable all motors
+
   // Check if there is a serial connection
   if (Serial.available() > 0) {
     // Read in the string from the serial port
@@ -42,11 +44,14 @@ void loop() {
         dataStr = dataStr.substring(separatorIdx+ 1);
       }
     }
+    idx = 0;
 
     Serial.print(values[0]);
     Serial.print(",");
     if (values[0] > 0) {
       digitalWrite(motorPin1, HIGH);
+      delay(500);
+      digitalWrite(motorPin1, LOW);
       // Serial.print("1");
       // Serial.print(",");
     }
@@ -55,7 +60,8 @@ void loop() {
     Serial.print(",");
     if (values[1] > 0) {
       digitalWrite(motorPin2, HIGH);
-      // Serial.print("1");
+      delay(500);
+      digitalWrite(motorPin2, LOW);
       // Serial.print(",");
     }
 
@@ -63,6 +69,8 @@ void loop() {
     Serial.print(",");
     if (values[2] > 0) {
       digitalWrite(motorPin3, HIGH);
+      delay(500);
+      digitalWrite(motorPin3, LOW);
       // Serial.print("1");
       // Serial.print(",");
     }
@@ -71,7 +79,10 @@ void loop() {
     Serial.print(",");
     if (values[3] > 0) {
       digitalWrite(motorPin4, HIGH);
+      delay(500);
+      digitalWrite(motorPin4, LOW);
       // Serial.println("1");
     }
+
   }
 }
