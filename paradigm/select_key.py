@@ -12,8 +12,9 @@ font_size = 48
 
 # Colors
 WHITE = (255, 255, 255)
-LIGHTBLUE = (173, 216, 230)
-LIGHTGREEN = (144, 238, 144)
+LIGHT_BLUE = (173, 216, 230)
+LIGHT_GREEN = (144, 238, 144)
+LIGHT_GREY = (211, 211, 211)
 
 # Initial Screen size
 screen_width, screen_height = 800, 600
@@ -37,13 +38,13 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
     for row in range(n_rows):
         for col in range(n_cols):
             if row == 0 or col == 0:  # Check for the first row or column
-                color = (200, 200, 200)  # A different color for indices
+                color = LIGHT_GREY  # A different color for indices
             elif row - 1 == highlighted_row and col - 1 == highlighted_col:
-                color = LIGHTGREEN
+                color = LIGHT_GREEN
             elif row - 1 == highlighted_row:
-                color = LIGHTBLUE
+                color = LIGHT_BLUE
             elif col - 1 == highlighted_col:
-                color = LIGHTGREEN
+                color = LIGHT_GREEN
             else:
                 color = WHITE
 
@@ -56,8 +57,7 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
                 text = font.render(str(col), True, (0, 0, 0))
             elif col == 0 and row > 0:
                 # Row indices
-                letter = chr(64 + row)  # ASCII code for A is 65
-                text = font.render(letter, True, (0, 0, 0))
+                text = font.render(str(row), True, (0, 0, 0))
             elif row > 0 and col > 0:
                 # Grid cells
                 letter = chr(64 + row)
