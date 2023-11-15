@@ -25,19 +25,24 @@ font = pygame.font.Font(font_path, font_size)
 
 # Grid settings
 n_rows, n_cols = 4, 4
+n_rows += 1  # Add one for the row of indices
+n_cols += 1  # Add one for the column of indices
 row_height = screen_height // n_rows
 col_width = screen_width // n_cols
 highlighted_row = None
 highlighted_col = None
 
 
-# Function to draw the grid
 def draw_grid(n_rows, n_cols, row_height, col_width):
     for row in range(n_rows):
         for col in range(n_cols):
-            if row == highlighted_row:
+            if row == 0 or col == 0:  # Check for the first row or column
+                color = (200, 200, 200)  # A different color for indices
+            elif row - 1 == highlighted_row and col - 1 == highlighted_col:
+                color = LIGHTGREEN
+            elif row - 1 == highlighted_row:
                 color = LIGHTBLUE
-            elif col == highlighted_col:
+            elif col - 1 == highlighted_col:
                 color = LIGHTGREEN
             else:
                 color = WHITE
@@ -45,8 +50,21 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
             rect = pygame.Rect(col * col_width, row * row_height, col_width, row_height)
             pygame.draw.rect(screen, color, rect)
 
-            letter = chr(65 + row)
-            text = font.render(f"{letter}{col + 1}", True, (0, 0, 0))
+            # Determine what text to render
+            if row == 0 and col > 0:
+                # Column indices
+                text = font.render(str(col), True, (0, 0, 0))
+            elif col == 0 and row > 0:
+                # Row indices
+                letter = chr(64 + row)  # ASCII code for A is 65
+                text = font.render(letter, True, (0, 0, 0))
+            elif row > 0 and col > 0:
+                # Grid cells
+                letter = chr(64 + row)
+                text = font.render(f"{letter}{col}", True, (0, 0, 0))
+            else:
+                continue  # Skip the top-left corner
+
             text_rect = text.get_rect(center=rect.center)
             screen.blit(text, text_rect)
 
@@ -58,13 +76,14 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # Get the index of the row and column that was clicked
-            col = event.pos[0] // col_width
-            row = event.pos[1] // row_height
+            # Adjust to account for the additional row and column
+            col = event.pos[0] // col_width - 1
+            row = event.pos[1] // row_height - 1
 
-            # Highlight the clicked row and column
-            highlighted_row = row
-            highlighted_col = col
+            if row >= 0 and col >= 0:
+                # Highlight only if a valid grid cell (not an index cell) is clicked
+                highlighted_row = row
+                highlighted_col = col
         elif event.type == pygame.VIDEORESIZE:
             # The window has been resized, so resize the grid
             screen_width, screen_height = event.size
