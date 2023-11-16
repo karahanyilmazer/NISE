@@ -7,7 +7,7 @@ import pygame
 pygame.init()
 
 # Set the font and size
-font_path = path.join(path.abspath(__file__), "..", "materials", "EsseGrotesk.otf")
+font_path = path.join(path.abspath(__file__), '..', 'materials', 'EsseGrotesk.otf')
 font_size = 48
 
 # Colors
@@ -20,7 +20,7 @@ LIGHT_GREY = (211, 211, 211)
 # Initial Screen size
 screen_width, screen_height = 800, 600
 screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
-pygame.display.set_caption("Interactive Grid")
+pygame.display.set_caption('Interactive Grid')
 
 # Load font
 font = pygame.font.Font(font_path, font_size)
@@ -52,38 +52,38 @@ def draw_tick(rect):
 
 def draw_grid(n_rows, n_cols, row_height, col_width):
     letter_list = [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "J",
-        "K",
-        "L",
-        "M",
-        "N",
-        "O",
-        "P",
-        "Q",
-        "R",
-        "S",
-        "T",
-        "U",
-        "V",
-        "W",
-        "X",
-        "Y",
-        "Z",
-        ".",
-        "?",
-        " ",
-        " ",
-        " ",
-        " ",
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'I',
+        'J',
+        'K',
+        'L',
+        'M',
+        'N',
+        'O',
+        'P',
+        'Q',
+        'R',
+        'S',
+        'T',
+        'U',
+        'V',
+        'W',
+        'X',
+        'Y',
+        'Z',
+        '.',
+        '?',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
     ]
     idx = 0
 
@@ -117,7 +117,7 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
                 # Grid cells
                 letter_1 = letter_list[idx]
                 letter_2 = letter_list[idx + 1]
-                text = font.render(f"{letter_1}   {letter_2}", True, (0, 0, 0))
+                text = font.render(f'{letter_1}   {letter_2}', True, (0, 0, 0))
                 idx += 2
             else:
                 continue  # Skip the top-left corner
