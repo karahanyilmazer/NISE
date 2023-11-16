@@ -34,6 +34,21 @@ col_width = screen_width // n_cols
 highlighted_row = None
 highlighted_col = None
 
+# Load the tick image
+tick_image_path = path.join(path.abspath(__file__), '..', 'materials', 'tick.png')
+tick_image = pygame.image.load(tick_image_path)
+# Adjust the size as needed
+tick_size = min(row_height / 2, col_width / 2)
+tick_image = pygame.transform.scale(tick_image, (tick_size, tick_size))
+
+
+def draw_tick(rect):
+    # Calculate the position to center the tick image in the rect
+    image_rect = tick_image.get_rect(center=rect.center)
+
+    # Blit the image onto the screen
+    screen.blit(tick_image, image_rect.topleft)
+
 
 def draw_grid(n_rows, n_cols, row_height, col_width):
     letter_list = [
@@ -95,6 +110,9 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
             elif col == 0 and row > 0:
                 # Row indices
                 text = font.render(str(row), True, (0, 0, 0))
+            # Draw tick in the last cell
+            elif row == n_rows - 1 and col == n_cols - 1:
+                draw_tick(rect)
             elif row > 0 and col > 0:
                 # Grid cells
                 letter_1 = letter_list[idx]
