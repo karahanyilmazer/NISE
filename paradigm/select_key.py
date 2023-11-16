@@ -15,7 +15,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 BLUE = (37, 122, 196)
 LIGHT_BLUE = (173, 216, 230)
-LIGHT_GREEN = (144, 238, 144)
+LIGHT_GREEN = (114, 232, 114)
 LIGHT_GREY = (211, 211, 211)
 VERY_LIGHT_GREY = (220, 220, 220)
 
@@ -120,6 +120,7 @@ def draw_cell(screen, rect, idx):
         center=(text_2_rect.centerx, text_2_rect.bottom + padding)
     )
 
+    # Display the letters and numbers
     screen.blit(text_1, text_1_rect.topleft)
     screen.blit(number_1, number_1_rect.topleft)
     screen.blit(text_2, text_2_rect.topleft)
@@ -162,22 +163,30 @@ def draw_grid_lines(n_rows, n_cols, row_height, col_width, color):
 
 def draw_grid(n_rows, n_cols, row_height, col_width):
     idx = 0
+    # Create a transparent surface for the highlights
+    highlight_surface = pygame.Surface((col_width, row_height), pygame.SRCALPHA)
 
     for row in range(n_rows):
         for col in range(n_cols):
-            if row == 0 or col == 0:  # Check for the first row or column
-                color = LIGHT_GREY  # A different color for indices
-            elif row - 1 == highlighted_row and col - 1 == highlighted_col:
-                color = LIGHT_GREEN
-            elif row - 1 == highlighted_row:
-                color = LIGHT_BLUE
-            elif col - 1 == highlighted_col:
-                color = LIGHT_GREEN
-            else:
-                color = WHITE
-
+            color = WHITE
             rect = pygame.Rect(col * col_width, row * row_height, col_width, row_height)
             pygame.draw.rect(screen, color, rect)
+
+            # Light grey for the indices
+            if row == 0 or col == 0:
+                color = LIGHT_GREY  # A different color for indices
+                pygame.draw.rect(screen, color, rect)
+            # Green for the selected row and column
+            else:
+                # Selected cell
+                if row - 1 == highlighted_row and col - 1 == highlighted_col:
+                    highlight_surface.fill((*LIGHT_GREEN, 242))  # 90% alpha
+                    screen.blit(highlight_surface, rect.topleft)
+
+                # Selected row and column
+                elif row - 1 == highlighted_row or col - 1 == highlighted_col:
+                    highlight_surface.fill((*LIGHT_GREEN, 64))  # 25% alpha
+                    screen.blit(highlight_surface, rect.topleft)
 
             text = None
 
@@ -200,7 +209,6 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
             # Grid cells
             elif row > 0 and col > 0:
                 draw_cell(screen, rect, idx)
-
                 idx += 2
 
             # Skip the top-left corner
