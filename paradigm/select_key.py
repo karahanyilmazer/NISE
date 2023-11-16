@@ -48,6 +48,84 @@ tick_size = min(row_height // 2, col_width // 2)
 tick_image = pygame.transform.scale(tick_image, (tick_size, tick_size))
 
 
+def draw_cell(screen, rect, idx):
+    letter_list = [
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'I',
+        'J',
+        'K',
+        'L',
+        'M',
+        'N',
+        'O',
+        'P',
+        'Q',
+        'R',
+        'S',
+        'T',
+        'U',
+        'V',
+        'W',
+        'X',
+        'Y',
+        'Z',
+        '.',
+        '?',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+    ]
+
+    # Define the vertical padding between the letter and the number
+    padding = 15
+
+    # Calculate the center for the entire cell content (letters and numbers)
+    cell_content_center = rect.centerx, rect.centery - number_font_size // 3
+
+    # Draw the first letter and its index
+    letter_1 = letter_list[idx]
+    text_1 = font.render(letter_1, True, BLACK)
+    text_1_rect = text_1.get_rect(
+        center=(
+            cell_content_center[0] - col_width // 4,
+            cell_content_center[1],
+        )
+    )
+
+    number_1 = number_font.render('1', True, BLUE)
+    number_1_rect = number_1.get_rect(
+        center=(text_1_rect.centerx, text_1_rect.bottom + padding)
+    )
+
+    # Draw the second letter and its index
+    letter_2 = letter_list[idx + 1]
+    text_2 = font.render(letter_2, True, BLACK)
+    text_2_rect = text_2.get_rect(
+        center=(
+            cell_content_center[0] + col_width // 4,
+            cell_content_center[1],
+        )
+    )
+
+    number_2 = number_font.render('2', True, BLUE)
+    number_2_rect = number_2.get_rect(
+        center=(text_2_rect.centerx, text_2_rect.bottom + padding)
+    )
+
+    screen.blit(text_1, text_1_rect.topleft)
+    screen.blit(number_1, number_1_rect.topleft)
+    screen.blit(text_2, text_2_rect.topleft)
+    screen.blit(number_2, number_2_rect.topleft)
+
+
 def draw_space_symbol(screen, rect):
     # Draw a wide underscore or another appropriate symbol to represent a space
     underscore_width = rect.width // 3
@@ -83,40 +161,6 @@ def draw_grid_lines(n_rows, n_cols, row_height, col_width, color):
 
 
 def draw_grid(n_rows, n_cols, row_height, col_width):
-    letter_list = [
-        'A',
-        'B',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'L',
-        'M',
-        'N',
-        'O',
-        'P',
-        'Q',
-        'R',
-        'S',
-        'T',
-        'U',
-        'V',
-        'W',
-        'X',
-        'Y',
-        'Z',
-        '.',
-        '?',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-    ]
     idx = 0
 
     for row in range(n_rows):
@@ -137,8 +181,6 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
 
             text = None
 
-            # Determine what text to render
-
             # Column indices
             if row == 0 and col > 0:
                 text = font.render(str(col), True, (0, 0, 0))
@@ -157,45 +199,7 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
 
             # Grid cells
             elif row > 0 and col > 0:
-                # Calculate the vertical padding between the letter and the number
-                padding = 15  # Increase or decrease this value to adjust padding
-
-                # Calculate the center for the entire cell content (letters and numbers)
-                cell_content_center = rect.centerx, rect.centery - number_font_size // 3
-
-                # Draw the first letter and its index
-                letter_1 = letter_list[idx]
-                text_1 = font.render(letter_1, True, BLACK)
-                text_1_rect = text_1.get_rect(
-                    center=(
-                        cell_content_center[0] - col_width // 4,
-                        cell_content_center[1],
-                    )
-                )
-                screen.blit(text_1, text_1_rect.topleft)
-
-                number_1 = number_font.render('1', True, BLUE)
-                number_1_rect = number_1.get_rect(
-                    center=(text_1_rect.centerx, text_1_rect.bottom + padding)
-                )
-                screen.blit(number_1, number_1_rect.topleft)
-
-                # Draw the second letter and its index
-                letter_2 = letter_list[idx + 1]
-                text_2 = font.render(letter_2, True, BLACK)
-                text_2_rect = text_2.get_rect(
-                    center=(
-                        cell_content_center[0] + col_width // 4,
-                        cell_content_center[1],
-                    )
-                )
-                screen.blit(text_2, text_2_rect.topleft)
-
-                number_2 = number_font.render('2', True, BLUE)
-                number_2_rect = number_2.get_rect(
-                    center=(text_2_rect.centerx, text_2_rect.bottom + padding)
-                )
-                screen.blit(number_2, number_2_rect.topleft)
+                draw_cell(screen, rect, idx)
 
                 idx += 2
 
