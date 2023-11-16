@@ -11,6 +11,7 @@ font_path = path.join(path.abspath(__file__), "..", "materials", "EsseGrotesk.ot
 font_size = 48
 
 # Colors
+BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 LIGHT_BLUE = (173, 216, 230)
 LIGHT_GREEN = (144, 238, 144)
@@ -35,6 +36,42 @@ highlighted_col = None
 
 
 def draw_grid(n_rows, n_cols, row_height, col_width):
+    letter_list = [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",
+        ".",
+        "?",
+        " ",
+        " ",
+        " ",
+        " ",
+    ]
+    idx = 0
+
     for row in range(n_rows):
         for col in range(n_cols):
             if row == 0 or col == 0:  # Check for the first row or column
@@ -60,8 +97,10 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
                 text = font.render(str(row), True, (0, 0, 0))
             elif row > 0 and col > 0:
                 # Grid cells
-                letter = chr(64 + row)
-                text = font.render(f"{letter}{col}", True, (0, 0, 0))
+                letter_1 = letter_list[idx]
+                letter_2 = letter_list[idx + 1]
+                text = font.render(f"{letter_1}   {letter_2}", True, (0, 0, 0))
+                idx += 2
             else:
                 continue  # Skip the top-left corner
 
