@@ -48,6 +48,30 @@ tick_size = min(row_height // 2, col_width // 2)
 tick_image = pygame.transform.scale(tick_image, (tick_size, tick_size))
 
 
+def color_cell(row, col, highlight_surface):
+    color = WHITE
+    rect = pygame.Rect(col * col_width, row * row_height, col_width, row_height)
+    pygame.draw.rect(screen, color, rect)
+
+    # Light grey for the indices
+    if row == 0 or col == 0:
+        color = LIGHT_GREY  # A different color for indices
+        pygame.draw.rect(screen, color, rect)
+    # Green for the selected row and column
+    else:
+        # Selected cell
+        if row - 1 == highlighted_row and col - 1 == highlighted_col:
+            highlight_surface.fill((*LIGHT_GREEN, 242))  # 90% alpha
+            screen.blit(highlight_surface, rect.topleft)
+
+        # Selected row and column
+        elif row - 1 == highlighted_row or col - 1 == highlighted_col:
+            highlight_surface.fill((*LIGHT_GREEN, 64))  # 25% alpha
+            screen.blit(highlight_surface, rect.topleft)
+
+    return rect
+
+
 def draw_cell(screen, rect, idx):
     letter_list = [
         'A',
@@ -163,32 +187,14 @@ def draw_grid_lines(n_rows, n_cols, row_height, col_width, color):
 
 def draw_grid(n_rows, n_cols, row_height, col_width):
     idx = 0
+
     # Create a transparent surface for the highlights
     highlight_surface = pygame.Surface((col_width, row_height), pygame.SRCALPHA)
 
     for row in range(n_rows):
         for col in range(n_cols):
-            color = WHITE
-            rect = pygame.Rect(col * col_width, row * row_height, col_width, row_height)
-            pygame.draw.rect(screen, color, rect)
-
-            # Light grey for the indices
-            if row == 0 or col == 0:
-                color = LIGHT_GREY  # A different color for indices
-                pygame.draw.rect(screen, color, rect)
-            # Green for the selected row and column
-            else:
-                # Selected cell
-                if row - 1 == highlighted_row and col - 1 == highlighted_col:
-                    highlight_surface.fill((*LIGHT_GREEN, 242))  # 90% alpha
-                    screen.blit(highlight_surface, rect.topleft)
-
-                # Selected row and column
-                elif row - 1 == highlighted_row or col - 1 == highlighted_col:
-                    highlight_surface.fill((*LIGHT_GREEN, 64))  # 25% alpha
-                    screen.blit(highlight_surface, rect.topleft)
-
             text = None
+            rect = color_cell(row, col, highlight_surface)
 
             # Column indices
             if row == 0 and col > 0:
