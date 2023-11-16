@@ -16,6 +16,7 @@ WHITE = (255, 255, 255)
 LIGHT_BLUE = (173, 216, 230)
 LIGHT_GREEN = (144, 238, 144)
 LIGHT_GREY = (211, 211, 211)
+VERY_LIGHT_GREY = (220, 220, 220)
 
 # Initial Screen size
 screen_width, screen_height = 800, 600
@@ -60,6 +61,20 @@ def draw_tick(rect):
 
     # Blit the image onto the screen
     screen.blit(tick_image, image_rect.topleft)
+
+
+def draw_grid_lines(n_rows, n_cols, row_height, col_width, color):
+    # Draw horizontal lines
+    for row in range(1, n_rows):
+        pygame.draw.line(
+            screen, color, (0, row * row_height), (screen_width, row * row_height), 3
+        )
+
+    # Draw vertical lines
+    for col in range(1, n_cols):
+        pygame.draw.line(
+            screen, color, (col * col_width, 0), (col * col_width, screen_height), 3
+        )
 
 
 def draw_grid(n_rows, n_cols, row_height, col_width):
@@ -183,6 +198,7 @@ while running:
     # Redraw the screen
     screen.fill(WHITE)
     draw_grid(n_rows, n_cols, row_height, col_width)
+    draw_grid_lines(n_rows, n_cols, row_height, col_width, VERY_LIGHT_GREY)
 
     # Update the display
     pygame.display.flip()
