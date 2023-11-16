@@ -13,6 +13,7 @@ font_size = 48
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+BLUE = (37, 122, 196)
 LIGHT_BLUE = (173, 216, 230)
 LIGHT_GREEN = (144, 238, 144)
 LIGHT_GREY = (211, 211, 211)
@@ -35,11 +36,15 @@ col_width = screen_width // n_cols
 highlighted_row = None
 highlighted_col = None
 
+# Set the font and size for the numbers
+number_font_size = font_size // 2
+number_font = pygame.font.Font(font_path, number_font_size)
+
 # Load the tick image
 tick_image_path = path.join(path.abspath(__file__), '..', 'materials', 'tick.png')
 tick_image = pygame.image.load(tick_image_path)
 # Adjust the size as needed
-tick_size = min(row_height / 2, col_width / 2)
+tick_size = min(row_height // 2, col_width // 2)
 tick_image = pygame.transform.scale(tick_image, (tick_size, tick_size))
 
 
@@ -152,9 +157,46 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
 
             # Grid cells
             elif row > 0 and col > 0:
+                # Calculate the vertical padding between the letter and the number
+                padding = 15  # Increase or decrease this value to adjust padding
+
+                # Calculate the center for the entire cell content (letters and numbers)
+                cell_content_center = rect.centerx, rect.centery - number_font_size // 3
+
+                # Draw the first letter and its index
                 letter_1 = letter_list[idx]
+                text_1 = font.render(letter_1, True, BLACK)
+                text_1_rect = text_1.get_rect(
+                    center=(
+                        cell_content_center[0] - col_width // 4,
+                        cell_content_center[1],
+                    )
+                )
+                screen.blit(text_1, text_1_rect.topleft)
+
+                number_1 = number_font.render('1', True, BLUE)
+                number_1_rect = number_1.get_rect(
+                    center=(text_1_rect.centerx, text_1_rect.bottom + padding)
+                )
+                screen.blit(number_1, number_1_rect.topleft)
+
+                # Draw the second letter and its index
                 letter_2 = letter_list[idx + 1]
-                text = font.render(f'{letter_1}   {letter_2}', True, (0, 0, 0))
+                text_2 = font.render(letter_2, True, BLACK)
+                text_2_rect = text_2.get_rect(
+                    center=(
+                        cell_content_center[0] + col_width // 4,
+                        cell_content_center[1],
+                    )
+                )
+                screen.blit(text_2, text_2_rect.topleft)
+
+                number_2 = number_font.render('2', True, BLUE)
+                number_2_rect = number_2.get_rect(
+                    center=(text_2_rect.centerx, text_2_rect.bottom + padding)
+                )
+                screen.blit(number_2, number_2_rect.topleft)
+
                 idx += 2
 
             # Skip the top-left corner
