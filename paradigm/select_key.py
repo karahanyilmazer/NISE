@@ -22,7 +22,7 @@ VERY_LIGHT_GREY = (220, 220, 220)
 # Initial Screen size
 screen_width, screen_height = 800, 600
 screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
-pygame.display.set_caption('Interactive Grid')
+pygame.display.set_caption('Letter Selection Screen')
 
 # Load font
 font = pygame.font.Font(font_path, font_size)
@@ -31,8 +31,10 @@ font = pygame.font.Font(font_path, font_size)
 n_rows, n_cols = 4, 4
 n_rows += 1  # Add one for the row of indices
 n_cols += 1  # Add one for the column of indices
-row_height = screen_height // n_rows
-col_width = screen_width // n_cols
+index_row_height = screen_height // (2 * n_rows - 1)  # Half the size for the index row
+index_col_width = screen_width // (2 * n_cols - 1)  # Half the size for the index column
+row_height = 2 * screen_height // (2 * n_rows - 1)  # Remaining rows
+col_width = 2 * screen_width // (2 * n_cols - 1)  # Remaining columns
 highlighted_row = None
 highlighted_col = None
 
@@ -48,15 +50,26 @@ tick_size = min(row_height // 2, col_width // 2)
 tick_image = pygame.transform.scale(tick_image, (tick_size, tick_size))
 
 
-def color_cell(row, col, highlight_surface):
-    color = WHITE
-    rect = pygame.Rect(col * col_width, row * row_height, col_width, row_height)
-    pygame.draw.rect(screen, color, rect)
+def color_cell(row, col):
+    # Create a transparent surface for the highlights
+    highlight_surface = pygame.Surface((col_width, row_height), pygame.SRCALPHA)
+
+    # Calculate the top-left position of the cell
+    x = index_col_width + (col - 1) * col_width if col > 0 else 0
+    y = index_row_height + (row - 1) * row_height if row > 0 else 0
+
+    # Adjust the size for index row and column
+    width = index_col_width if col == 0 else col_width
+    height = index_row_height if row == 0 else row_height
+
+    # Create the rect for the cell
+    rect = pygame.Rect(x, y, width, height)
+    # rect = pygame.Rect(col * col_width, row * row_height, col_width, row_height)
+    pygame.draw.rect(screen, WHITE, rect)
 
     # Light grey for the indices
     if row == 0 or col == 0:
-        color = LIGHT_GREY  # A different color for indices
-        pygame.draw.rect(screen, color, rect)
+        pygame.draw.rect(screen, LIGHT_GREY, rect)
     # Green for the selected row and column
     else:
         # Selected cell
@@ -171,30 +184,34 @@ def draw_tick(rect):
     screen.blit(tick_image, image_rect.topleft)
 
 
-def draw_grid_lines(n_rows, n_cols, row_height, col_width, color):
+def draw_grid_lines(n_rows, n_cols, color):
     # Draw horizontal lines
-    for row in range(1, n_rows):
-        pygame.draw.line(
-            screen, color, (0, row * row_height), (screen_width, row * row_height), 3
-        )
+    for row in range(n_rows):  # +1 to account for the index row
+        y = index_row_height + row * row_height
+        start_pos = (0, y)
+        end_pos = (screen_width, y)
+        # Draw a thicker line for the index row
+        line_width = 3 if row > 0 else 5
+        pygame.draw.line(screen, color, start_pos, end_pos, line_width)
 
     # Draw vertical lines
-    for col in range(1, n_cols):
-        pygame.draw.line(
-            screen, color, (col * col_width, 0), (col * col_width, screen_height), 3
-        )
+    for col in range(n_cols):  # +1 to account for the index column
+        x = index_col_width + col * col_width
+        start_pos = (x, 0)
+        end_pos = (x, screen_height)
+        # Draw a thicker line for the index column
+        line_width = 3 if col > 0 else 5
+        pygame.draw.line(screen, color, start_pos, end_pos, line_width)
 
 
-def draw_grid(n_rows, n_cols, row_height, col_width):
+def draw_grid(n_rows, n_cols):
     idx = 0
-
-    # Create a transparent surface for the highlights
-    highlight_surface = pygame.Surface((col_width, row_height), pygame.SRCALPHA)
 
     for row in range(n_rows):
         for col in range(n_cols):
             text = None
-            rect = color_cell(row, col, highlight_surface)
+
+            rect = color_cell(row, col)
 
             # Column indices
             if row == 0 and col > 0:
@@ -234,13 +251,20 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # Adjust to account for the additional row and column
-            col = event.pos[0] // col_width - 1
-            row = event.pos[1] // row_height - 1
+            mx, my = event.pos
+            if mx < index_col_width:
+                col = 0
+            else:
+                col = (mx - index_col_width) // col_width + 1
+            if my < index_row_height:
+                row = 0
+            else:
+                row = (my - index_row_height) // row_height + 1
 
-            if row >= 0 and col >= 0:
-                # Highlight only if a valid grid cell (not an index cell) is clicked
-                highlighted_row = row
-                highlighted_col = col
+            # Highlight only if a valid grid cell (not an index cell) is clicked
+            if row > 0 and col > 0:
+                highlighted_row = row - 1
+                highlighted_col = col - 1
         elif event.type == pygame.VIDEORESIZE:
             # The window has been resized, so resize the grid
             screen_width, screen_height = event.size
@@ -248,17 +272,22 @@ while running:
                 (screen_width, screen_height), pygame.RESIZABLE
             )
 
-            row_height = screen_height // n_rows
-            col_width = screen_width // n_cols
+            index_row_height = screen_height // (
+                2 * n_rows - 1
+            )  # Half the size for the index row
+            index_col_width = screen_width // (
+                2 * n_cols - 1
+            )  # Half the size for the index column
+            row_height = 2 * screen_height // (2 * n_rows - 1)  # Remaining rows
+            col_width = 2 * screen_width // (2 * n_cols - 1)  # Remaining columns
 
-            font = pygame.font.Font(
-                font_path, font_size
-            )  # Re-create the font to adjust the size if needed
+            # Re-adjust the font size if needed
+            font = pygame.font.Font(font_path, font_size)
 
     # Redraw the screen
     screen.fill(WHITE)
-    draw_grid(n_rows, n_cols, row_height, col_width)
-    draw_grid_lines(n_rows, n_cols, row_height, col_width, VERY_LIGHT_GREY)
+    draw_grid(n_rows, n_cols)
+    draw_grid_lines(n_rows, n_cols, VERY_LIGHT_GREY)
 
     # Update the display
     pygame.display.flip()
