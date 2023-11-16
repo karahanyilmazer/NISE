@@ -42,6 +42,18 @@ tick_size = min(row_height / 2, col_width / 2)
 tick_image = pygame.transform.scale(tick_image, (tick_size, tick_size))
 
 
+def draw_space_symbol(screen, rect):
+    # Draw a wide underscore or another appropriate symbol to represent a space
+    underscore_width = rect.width // 3
+    underscore_height = 5  # The thickness of the underscore
+    underscore_start = (
+        rect.centerx - underscore_width // 2,
+        rect.centery + rect.height // 4,
+    )
+    underscore_end = (underscore_start[0] + underscore_width, underscore_start[1])
+    pygame.draw.line(screen, BLACK, underscore_start, underscore_end, underscore_height)
+
+
 def draw_tick(rect):
     # Calculate the position to center the tick image in the rect
     image_rect = tick_image.get_rect(center=rect.center)
@@ -103,27 +115,40 @@ def draw_grid(n_rows, n_cols, row_height, col_width):
             rect = pygame.Rect(col * col_width, row * row_height, col_width, row_height)
             pygame.draw.rect(screen, color, rect)
 
+            text = None
+
             # Determine what text to render
+
+            # Column indices
             if row == 0 and col > 0:
-                # Column indices
                 text = font.render(str(col), True, (0, 0, 0))
+
+            # Row indices
             elif col == 0 and row > 0:
-                # Row indices
                 text = font.render(str(row), True, (0, 0, 0))
-            # Draw tick in the last cell
+
+            # Space symbol
+            elif row == n_rows - 1 and col == n_cols - 2:
+                draw_space_symbol(screen, rect)
+
+            # Tick symbol
             elif row == n_rows - 1 and col == n_cols - 1:
                 draw_tick(rect)
+
+            # Grid cells
             elif row > 0 and col > 0:
-                # Grid cells
                 letter_1 = letter_list[idx]
                 letter_2 = letter_list[idx + 1]
                 text = font.render(f'{letter_1}   {letter_2}', True, (0, 0, 0))
                 idx += 2
-            else:
-                continue  # Skip the top-left corner
 
-            text_rect = text.get_rect(center=rect.center)
-            screen.blit(text, text_rect)
+            # Skip the top-left corner
+            else:
+                continue
+
+            if text:
+                text_rect = text.get_rect(center=rect.center)
+                screen.blit(text, text_rect)
 
 
 # Main loop
