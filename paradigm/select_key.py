@@ -247,19 +247,6 @@ class LetterSelectionScreen(object):
         screen.blit(text_2, text_2_rect.topleft)
         screen.blit(number_2, number_2_rect.topleft)
 
-    def draw_space_symbol(self, screen, rect):
-        # Draw a wide underscore or another appropriate symbol to represent a space
-        underscore_width = rect.width // 3
-        underscore_height = 5  # The thickness of the underscore
-        underscore_start = (
-            rect.centerx - underscore_width // 2,
-            rect.centery + rect.height // 4,
-        )
-        underscore_end = (underscore_start[0] + underscore_width, underscore_start[1])
-        pygame.draw.line(
-            screen, BLACK, underscore_start, underscore_end, underscore_height
-        )
-
     def draw_image(self, rect, image, pos=None):
         # Define the vertical padding between the letter and the number
         padding = 15
