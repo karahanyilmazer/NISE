@@ -57,13 +57,34 @@ class LetterSelectionScreen(object):
         self.highlighted_row = None
         self.highlighted_col = None
 
+        self.image_size = min(self.row_height // 2, self.col_width // 2)
+
         self.tick_image_path = path.join(
             path.abspath(__file__), '..', 'materials', 'tick.png'
         )
         self.tick_image = pygame.image.load(self.tick_image_path)
-        self.tick_size = min(self.row_height // 2, self.col_width // 2)
         self.tick_image = pygame.transform.scale(
-            self.tick_image, (self.tick_size, self.tick_size)
+            self.tick_image, (self.image_size, self.image_size)
+        )
+
+        self.back_image_path = path.join(
+            path.abspath(__file__), '..', 'materials', 'backspace.png'
+        )
+        self.back_image = pygame.image.load(self.back_image_path)
+        aspect_ratio = self.back_image.get_width() / self.back_image.get_height()
+        new_height = int(self.image_size / aspect_ratio)
+        self.back_image = pygame.transform.scale(
+            self.back_image, (self.image_size, new_height)
+        )
+
+        self.space_image_path = path.join(
+            path.abspath(__file__), '..', 'materials', 'space.png'
+        )
+        self.space_image = pygame.image.load(self.space_image_path)
+        aspect_ratio = self.space_image.get_width() / self.space_image.get_height()
+        new_height = int(self.image_size / aspect_ratio)
+        self.space_image = pygame.transform.scale(
+            self.space_image, (self.image_size, new_height)
         )
 
         self.running = True
@@ -101,7 +122,8 @@ class LetterSelectionScreen(object):
             '.': [4, 2, 1],
             '?': [4, 2, 2],
             ' ': [4, 3, 1],
-            'send': [4, 3, 2],
+            'backspace': [4, 3, 2],
+            'send': [4, 4, 1],
         }
 
     def get_letter(self, keys):
@@ -180,7 +202,7 @@ class LetterSelectionScreen(object):
             'Z',
             '.',
             '?',
-            ' ',
+            '_',
             ' ',
             ' ',
             ' ',
@@ -241,12 +263,39 @@ class LetterSelectionScreen(object):
             screen, BLACK, underscore_start, underscore_end, underscore_height
         )
 
-    def draw_tick(self, rect):
+    def draw_image(self, rect, image, pos=None):
+        # Define the vertical padding between the letter and the number
+        padding = 15
+
+        # Calculate the center for the entire cell content (letters and numbers)
+        cell_content_center = rect.centerx, rect.centery - self.number_font_size // 3
+
+        if pos == 'left':
+            offset = -self.col_width // 4
+            idx = '1'
+        elif pos == 'right':
+            offset = self.col_width // 4
+            idx = '2'
+        else:
+            offset = 0
+            idx = None
+
         # Calculate the position to center the tick image in the rect
-        image_rect = self.tick_image.get_rect(center=rect.center)
+        image_rect = image.get_rect(
+            center=(
+                cell_content_center[0] + offset,
+                cell_content_center[1],
+            )
+        )
+
+        number = self.number_font.render(idx, True, BLUE)
+        number_rect = number.get_rect(
+            center=(image_rect.centerx, image_rect.bottom + padding)
+        )
 
         # Blit the image onto the screen
-        self.screen.blit(self.tick_image, image_rect.topleft)
+        self.screen.blit(image, image_rect.topleft)
+        self.screen.blit(number, number_rect.topleft)
 
     def draw_grid_lines(self, n_rows, n_cols, color):
         # Draw horizontal lines
@@ -285,13 +334,15 @@ class LetterSelectionScreen(object):
                 elif col == 0 and row > 0:
                     text = self.font.render(str(row), True, (0, 0, 0))
 
-                # Space symbol
+                # Space and backspace symbols
                 elif row == n_rows - 1 and col == n_cols - 2:
-                    self.draw_space_symbol(self.screen, rect)
+                    # self.draw_space_symbol(self.screen, rect)
+                    self.draw_image(rect, self.space_image, pos='left')
+                    self.draw_image(rect, self.back_image, pos='right')
 
                 # Tick symbol
                 elif row == n_rows - 1 and col == n_cols - 1:
-                    self.draw_tick(rect)
+                    self.draw_image(rect, self.tick_image)
 
                 # Grid cells
                 elif row > 0 and col > 0:
