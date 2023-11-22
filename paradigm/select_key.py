@@ -25,9 +25,14 @@ class LetterSelectionScreen(object):
 
         self.screen_width, self.screen_height = 800, 600
         self.header_height = 60  # Height of the header space to display selected keys
-        self.screen_height += (
-            self.header_height
-        )  # Increase overall screen height to accommodate the header
+        # Increase overall screen height to accommodate the header
+        self.screen_height += self.header_height
+
+        self.circle_positions = [
+            (20, self.header_height // 2),
+            (60, self.header_height // 2),
+            (100, self.header_height // 2),
+        ]
 
         self.screen = pygame.display.set_mode(
             (self.screen_width, self.screen_height), pygame.RESIZABLE
@@ -47,23 +52,41 @@ class LetterSelectionScreen(object):
             2 * (self.screen_height - self.header_height) // (2 * self.n_rows - 1)
         )
 
-        # self.index_row_height = self.screen_height // (2 * self.n_rows - 1)
-        # self.row_height = 2 * self.screen_height // (2 * self.n_rows - 1)
-
         self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
         self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
-        self.selecting_col = False
+        self.selecting_col = True
         self.highlighted_row = None
         self.highlighted_col = None
+
+        self.image_size = min(self.row_height // 2, self.col_width // 2)
 
         self.tick_image_path = path.join(
             path.abspath(__file__), '..', 'materials', 'tick.png'
         )
         self.tick_image = pygame.image.load(self.tick_image_path)
-        self.tick_size = min(self.row_height // 2, self.col_width // 2)
         self.tick_image = pygame.transform.scale(
-            self.tick_image, (self.tick_size, self.tick_size)
+            self.tick_image, (self.image_size, self.image_size)
+        )
+
+        self.back_image_path = path.join(
+            path.abspath(__file__), '..', 'materials', 'backspace.png'
+        )
+        self.back_image = pygame.image.load(self.back_image_path)
+        aspect_ratio = self.back_image.get_width() / self.back_image.get_height()
+        new_height = int(self.image_size / aspect_ratio)
+        self.back_image = pygame.transform.scale(
+            self.back_image, (self.image_size, new_height)
+        )
+
+        self.space_image_path = path.join(
+            path.abspath(__file__), '..', 'materials', 'space.png'
+        )
+        self.space_image = pygame.image.load(self.space_image_path)
+        aspect_ratio = self.space_image.get_width() / self.space_image.get_height()
+        new_height = int(self.image_size / aspect_ratio)
+        self.space_image = pygame.transform.scale(
+            self.space_image, (self.image_size, new_height)
         )
 
         self.running = True
@@ -74,41 +97,42 @@ class LetterSelectionScreen(object):
         self.letter_dict = {
             'A': [1, 1, 1],
             'B': [1, 1, 2],
-            'C': [1, 2, 1],
-            'D': [1, 2, 2],
-            'E': [1, 3, 1],
-            'F': [1, 3, 2],
-            'G': [1, 4, 1],
-            'H': [1, 4, 2],
-            'I': [2, 1, 1],
-            'J': [2, 1, 2],
+            'C': [2, 1, 1],
+            'D': [2, 1, 2],
+            'E': [3, 1, 1],
+            'F': [3, 1, 2],
+            'G': [4, 1, 1],
+            'H': [4, 1, 2],
+            'I': [1, 2, 1],
+            'J': [1, 2, 2],
             'K': [2, 2, 1],
             'L': [2, 2, 2],
-            'M': [2, 3, 1],
-            'N': [2, 3, 2],
-            'O': [2, 4, 1],
-            'P': [2, 4, 2],
-            'Q': [3, 1, 1],
-            'R': [3, 1, 2],
-            'S': [3, 2, 1],
-            'T': [3, 2, 2],
+            'M': [3, 2, 1],
+            'N': [3, 2, 2],
+            'O': [4, 2, 1],
+            'P': [4, 2, 2],
+            'Q': [1, 3, 1],
+            'R': [1, 3, 2],
+            'S': [2, 3, 1],
+            'T': [2, 3, 2],
             'U': [3, 3, 1],
             'V': [3, 3, 2],
-            'W': [3, 4, 1],
-            'X': [3, 4, 2],
-            'Y': [4, 1, 1],
-            'Z': [4, 1, 2],
-            '.': [4, 2, 1],
-            '?': [4, 2, 2],
-            ' ': [4, 3, 1],
-            'send': [4, 3, 2],
+            'W': [4, 3, 1],
+            'X': [4, 3, 2],
+            'Y': [1, 4, 1],
+            'Z': [1, 4, 2],
+            '.': [2, 4, 1],
+            '?': [2, 4, 2],
+            ' ': [3, 4, 1],
+            'backspace': [3, 4, 2],
+            'send': [4, 4, 1],
         }
 
     def get_letter(self, keys):
         for letter, key_combo in self.letter_dict.items():
             if key_combo == keys:
                 return letter
-        return None  # Return None if no matching letter is found
+        return ''  # Return None if no matching letter is found
 
     def color_cell(self, row, col):
         # Create a transparent surface for the highlights
@@ -180,7 +204,7 @@ class LetterSelectionScreen(object):
             'Z',
             '.',
             '?',
-            ' ',
+            '_',
             ' ',
             ' ',
             ' ',
@@ -228,25 +252,39 @@ class LetterSelectionScreen(object):
         screen.blit(text_2, text_2_rect.topleft)
         screen.blit(number_2, number_2_rect.topleft)
 
-    def draw_space_symbol(self, screen, rect):
-        # Draw a wide underscore or another appropriate symbol to represent a space
-        underscore_width = rect.width // 3
-        underscore_height = 5  # The thickness of the underscore
-        underscore_start = (
-            rect.centerx - underscore_width // 2,
-            rect.centery + rect.height // 4,
-        )
-        underscore_end = (underscore_start[0] + underscore_width, underscore_start[1])
-        pygame.draw.line(
-            screen, BLACK, underscore_start, underscore_end, underscore_height
+    def draw_image(self, rect, image, pos=None):
+        # Define the vertical padding between the letter and the number
+        padding = 15
+
+        # Calculate the center for the entire cell content (letters and numbers)
+        cell_content_center = rect.centerx, rect.centery - self.number_font_size // 3
+
+        if pos == 'left':
+            offset = -self.col_width // 4
+            idx = '1'
+        elif pos == 'right':
+            offset = self.col_width // 4
+            idx = '2'
+        else:
+            offset = 0
+            idx = None
+
+        # Calculate the position to center the tick image in the rect
+        image_rect = image.get_rect(
+            center=(
+                cell_content_center[0] + offset,
+                cell_content_center[1],
+            )
         )
 
-    def draw_tick(self, rect):
-        # Calculate the position to center the tick image in the rect
-        image_rect = self.tick_image.get_rect(center=rect.center)
+        number = self.number_font.render(idx, True, BLUE)
+        number_rect = number.get_rect(
+            center=(image_rect.centerx, image_rect.bottom + padding)
+        )
 
         # Blit the image onto the screen
-        self.screen.blit(self.tick_image, image_rect.topleft)
+        self.screen.blit(image, image_rect.topleft)
+        self.screen.blit(number, number_rect.topleft)
 
     def draw_grid_lines(self, n_rows, n_cols, color):
         # Draw horizontal lines
@@ -285,13 +323,15 @@ class LetterSelectionScreen(object):
                 elif col == 0 and row > 0:
                     text = self.font.render(str(row), True, (0, 0, 0))
 
-                # Space symbol
+                # Space and backspace symbols
                 elif row == n_rows - 1 and col == n_cols - 2:
-                    self.draw_space_symbol(self.screen, rect)
+                    # self.draw_space_symbol(self.screen, rect)
+                    self.draw_image(rect, self.space_image, pos='left')
+                    self.draw_image(rect, self.back_image, pos='right')
 
                 # Tick symbol
                 elif row == n_rows - 1 and col == n_cols - 1:
-                    self.draw_tick(rect)
+                    self.draw_image(rect, self.tick_image)
 
                 # Grid cells
                 elif row > 0 and col > 0:
@@ -306,13 +346,23 @@ class LetterSelectionScreen(object):
                     text_rect = text.get_rect(center=rect.center)
                     self.screen.blit(text, text_rect)
 
-    def show_letter(self):
-        pass
-
     def render_text(self, text, position, color=WHITE, background=None):
         text_surface = self.font.render(text, True, color, background)
         text_rect = text_surface.get_rect(center=position)
         self.screen.blit(text_surface, text_rect)
+
+    def draw_circles(self):
+        for i, position in enumerate(self.circle_positions):
+            if i < len(self.key_list):
+                # Draw filled circle
+                pygame.draw.circle(self.screen, LIGHT_GREEN, position, 10)
+                if i == 2:
+                    pygame.draw.circle(self.screen, BLUE, position, 10)
+            else:
+                # Draw hollow circle
+                pygame.draw.circle(self.screen, LIGHT_GREEN, position, 10, 2)
+                if i == 2:
+                    pygame.draw.circle(self.screen, BLUE, position, 10, 2)
 
     def run(self):
         while self.running:
@@ -322,23 +372,22 @@ class LetterSelectionScreen(object):
 
                 elif event.type == pygame.VIDEORESIZE:
                     # The window has been resized, so resize the grid
-                    screen_width, screen_height = event.size
+                    self.screen_width, self.screen_height = event.size
                     self.screen = pygame.display.set_mode(
-                        (screen_width, screen_height), pygame.RESIZABLE
+                        (self.screen_width, self.screen_height), pygame.RESIZABLE
                     )
 
-                    self.index_row_height = screen_height // (
-                        2 * self.n_rows - 1
-                    )  # Half the size for the index row
-                    self.index_col_width = screen_width // (
-                        2 * self.n_cols - 1
-                    )  # Half the size for the index column
+                    self.index_row_height = (
+                        self.screen_height - self.header_height
+                    ) // (2 * self.n_rows - 1)
                     self.row_height = (
-                        2 * screen_height // (2 * self.n_rows - 1)
-                    )  # Remaining rows
-                    self.col_width = (
-                        2 * screen_width // (2 * self.n_cols - 1)
-                    )  # Remaining columns
+                        2
+                        * (self.screen_height - self.header_height)
+                        // (2 * self.n_rows - 1)
+                    )
+
+                    self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
+                    self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     # Adjust to account for the additional row and column
@@ -369,18 +418,29 @@ class LetterSelectionScreen(object):
                         index = int(event.unicode) - 1  # Convert key to 0-based index
                         if self.selecting_col:
                             self.highlighted_col = index
-                            self.selecting_col = (
-                                False  # Next selection will be a column
-                            )
                         else:
                             self.highlighted_row = index
-                            self.selecting_col = True  # Switch back to row selection
 
                         if len(self.key_list) == 3:
-                            print(self.key_list)
-                            self.show_letter()
-                            self.word_list.append(self.get_letter(self.key_list))
+                            letter = self.get_letter(self.key_list)
+                            if letter not in ('backspace', 'send'):
+                                self.word_list.append(letter)
+                            elif letter == 'backspace':
+                                self.word_list.pop()
+                            elif letter == 'send':
+                                pass
+
                             self.key_list = []
+                            self.highlighted_row = None
+                            self.highlighted_col = None
+                    elif event.key == pygame.K_ESCAPE:
+                        self.running = False
+
+            # Check if we are selecting a row or column
+            if len(self.key_list) in (0, 2):
+                self.selecting_col = True
+            elif len(self.key_list) == 1:
+                self.selecting_col = False
 
             # Clear the screen
             self.screen.fill(WHITE)
@@ -394,6 +454,7 @@ class LetterSelectionScreen(object):
             )
             self.draw_grid(self.n_rows, self.n_cols)
             self.draw_grid_lines(self.n_rows, self.n_cols, VERY_LIGHT_GREY)
+            self.draw_circles()
 
             pygame.display.flip()
 
