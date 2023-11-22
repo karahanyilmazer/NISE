@@ -28,6 +28,12 @@ class LetterSelectionScreen(object):
         # Increase overall screen height to accommodate the header
         self.screen_height += self.header_height
 
+        self.circle_positions = [
+            (20, self.header_height // 2),
+            (60, self.header_height // 2),
+            (100, self.header_height // 2),
+        ]
+
         self.screen = pygame.display.set_mode(
             (self.screen_width, self.screen_height), pygame.RESIZABLE
         )
@@ -345,6 +351,19 @@ class LetterSelectionScreen(object):
         text_rect = text_surface.get_rect(center=position)
         self.screen.blit(text_surface, text_rect)
 
+    def draw_circles(self):
+        for i, position in enumerate(self.circle_positions):
+            if i < len(self.key_list):
+                # Draw filled circle
+                pygame.draw.circle(self.screen, LIGHT_GREEN, position, 10)
+                if i == 2:
+                    pygame.draw.circle(self.screen, BLUE, position, 10)
+            else:
+                # Draw hollow circle
+                pygame.draw.circle(self.screen, LIGHT_GREEN, position, 10, 2)
+                if i == 2:
+                    pygame.draw.circle(self.screen, BLUE, position, 10, 2)
+
     def run(self):
         while self.running:
             for event in pygame.event.get():
@@ -435,6 +454,7 @@ class LetterSelectionScreen(object):
             )
             self.draw_grid(self.n_rows, self.n_cols)
             self.draw_grid_lines(self.n_rows, self.n_cols, VERY_LIGHT_GREY)
+            self.draw_circles()
 
             pygame.display.flip()
 
