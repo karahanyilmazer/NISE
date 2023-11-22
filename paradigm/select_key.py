@@ -130,7 +130,7 @@ class LetterSelectionScreen(object):
         for letter, key_combo in self.letter_dict.items():
             if key_combo == keys:
                 return letter
-        return None  # Return None if no matching letter is found
+        return ''  # Return None if no matching letter is found
 
     def color_cell(self, row, col):
         # Create a transparent surface for the highlights
