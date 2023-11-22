@@ -1,8 +1,10 @@
+# %%
 import sys
 from os import path
 
 import pygame
 
+# %%
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 BLUE = (37, 122, 196)
@@ -36,6 +38,7 @@ class LetterSelectionScreen(object):
         self.row_height = 2 * self.screen_height // (2 * self.n_rows - 1)
         self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
+        self.selecting_col = False
         self.highlighted_row = None
         self.highlighted_col = None
 
@@ -49,6 +52,41 @@ class LetterSelectionScreen(object):
         )
 
         self.running = True
+
+        self.key_list = []
+
+        self.letter_dict = {
+            'A': [1, 1, 1],
+            'B': [1, 1, 2],
+            'C': [1, 2, 1],
+            'D': [1, 2, 2],
+            'E': [1, 3, 1],
+            'F': [1, 3, 2],
+            'G': [1, 4, 1],
+            'H': [1, 4, 2],
+            'I': [2, 1, 1],
+            'J': [2, 1, 2],
+            'K': [2, 2, 1],
+            'L': [2, 2, 2],
+            'M': [2, 3, 1],
+            'N': [2, 3, 2],
+            'O': [2, 4, 1],
+            'P': [2, 4, 2],
+            'Q': [3, 1, 1],
+            'R': [3, 1, 2],
+            'S': [3, 2, 1],
+            'T': [3, 2, 2],
+            'U': [3, 3, 1],
+            'V': [3, 3, 2],
+            'W': [3, 4, 1],
+            'X': [3, 4, 2],
+            'Y': [4, 1, 1],
+            'Z': [4, 1, 2],
+            '.': [4, 2, 1],
+            '?': [4, 2, 2],
+            'space': [4, 3, 1],
+            'send': [4, 3, 2],
+        }
 
     def color_cell(self, row, col):
         # Create a transparent surface for the highlights
@@ -241,27 +279,15 @@ class LetterSelectionScreen(object):
                     text_rect = text.get_rect(center=rect.center)
                     self.screen.blit(text, text_rect)
 
+    def show_letter(self):
+        pass
+
     def run(self):
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    # Adjust to account for the additional row and column
-                    mx, my = event.pos
-                    if mx < self.index_col_width:
-                        col = 0
-                    else:
-                        col = (mx - self.index_col_width) // self.col_width + 1
-                    if my < self.index_row_height:
-                        row = 0
-                    else:
-                        row = (my - self.index_row_height) // self.row_height + 1
 
-                    # Highlight only if a valid grid cell (not an index cell) is clicked
-                    if row > 0 and col > 0:
-                        self.highlighted_row = row - 1
-                        self.highlighted_col = col - 1
                 elif event.type == pygame.VIDEORESIZE:
                     # The window has been resized, so resize the grid
                     screen_width, screen_height = event.size
@@ -282,8 +308,42 @@ class LetterSelectionScreen(object):
                         2 * screen_width // (2 * self.n_cols - 1)
                     )  # Remaining columns
 
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    # Adjust to account for the additional row and column
+                    mx, my = event.pos
+                    if mx < self.index_col_width:
+                        col = 0
+                    else:
+                        col = (mx - self.index_col_width) // self.col_width + 1
+                    if my < self.index_row_height:
+                        row = 0
+                    else:
+                        row = (my - self.index_row_height) // self.row_height + 1
+
+                    # Highlight only if a valid grid cell (not an index cell) is clicked
+                    if row > 0 and col > 0:
+                        self.highlighted_row = row - 1
+                        self.highlighted_col = col - 1
+
                     # Re-adjust the font size if needed
                     self.font = pygame.font.Font(self.font_path, self.font_size)
+
+                elif event.type == pygame.KEYDOWN:
+                    if event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]:
+                        self.key_list.append(event.key)
+
+                        index = int(event.unicode) - 1  # Convert key to 0-based index
+                        if self.selecting_col:
+                            self.highlighted_col = index
+                            self.selecting_col = (
+                                False  # Next selection will be a column
+                            )
+                        else:
+                            self.highlighted_row = index
+                            self.selecting_col = True  # Switch back to row selection
+
+                        if len(self.key_list) == 3:
+                            self.show_letter()
 
             self.screen.fill(WHITE)
             self.draw_grid(self.n_rows, self.n_cols)
