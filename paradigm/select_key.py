@@ -3,6 +3,14 @@ from os import path
 
 import pygame
 
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+BLUE = (37, 122, 196)
+LIGHT_BLUE = (173, 216, 230)
+LIGHT_GREEN = (114, 232, 114)
+LIGHT_GREY = (211, 211, 211)
+VERY_LIGHT_GREY = (220, 220, 220)
+
 
 class LetterSelectionScreen(object):
     def __init__(self):
@@ -12,14 +20,6 @@ class LetterSelectionScreen(object):
         )
         self.font_size = 48
         self.number_font_size = self.font_size // 2
-
-        self.BLACK = (0, 0, 0)
-        self.WHITE = (255, 255, 255)
-        self.BLUE = (37, 122, 196)
-        self.LIGHT_BLUE = (173, 216, 230)
-        self.LIGHT_GREEN = (114, 232, 114)
-        self.LIGHT_GREY = (211, 211, 211)
-        self.VERY_LIGHT_GREY = (220, 220, 220)
 
         self.screen_width, self.screen_height = 800, 600
         self.screen = pygame.display.set_mode(
@@ -67,21 +67,21 @@ class LetterSelectionScreen(object):
         # Create the rect for the cell
         rect = pygame.Rect(x, y, width, height)
         # rect = pygame.Rect(col * col_width, row * row_height, col_width, row_height)
-        pygame.draw.rect(self.screen, self.WHITE, rect)
+        pygame.draw.rect(self.screen, WHITE, rect)
 
         # Light grey for the indices
         if row == 0 or col == 0:
-            pygame.draw.rect(self.screen, self.LIGHT_GREY, rect)
+            pygame.draw.rect(self.screen, LIGHT_GREY, rect)
         # Green for the selected row and column
         else:
             # Selected cell
             if row - 1 == self.highlighted_row and col - 1 == self.highlighted_col:
-                highlight_surface.fill((*self.LIGHT_GREEN, 242))  # 90% alpha
+                highlight_surface.fill((*LIGHT_GREEN, 242))  # 90% alpha
                 self.screen.blit(highlight_surface, rect.topleft)
 
             # Selected row and column
             elif row - 1 == self.highlighted_row or col - 1 == self.highlighted_col:
-                highlight_surface.fill((*self.LIGHT_GREEN, 64))  # 25% alpha
+                highlight_surface.fill((*LIGHT_GREEN, 64))  # 25% alpha
                 self.screen.blit(highlight_surface, rect.topleft)
 
         return rect
@@ -130,7 +130,7 @@ class LetterSelectionScreen(object):
 
         # Draw the first letter and its index
         letter_1 = letter_list[idx]
-        text_1 = self.font.render(letter_1, True, self.BLACK)
+        text_1 = self.font.render(letter_1, True, BLACK)
         text_1_rect = text_1.get_rect(
             center=(
                 cell_content_center[0] - self.col_width // 4,
@@ -138,14 +138,14 @@ class LetterSelectionScreen(object):
             )
         )
 
-        number_1 = self.number_font.render('1', True, self.BLUE)
+        number_1 = self.number_font.render('1', True, BLUE)
         number_1_rect = number_1.get_rect(
             center=(text_1_rect.centerx, text_1_rect.bottom + padding)
         )
 
         # Draw the second letter and its index
         letter_2 = letter_list[idx + 1]
-        text_2 = self.font.render(letter_2, True, self.BLACK)
+        text_2 = self.font.render(letter_2, True, BLACK)
         text_2_rect = text_2.get_rect(
             center=(
                 cell_content_center[0] + self.col_width // 4,
@@ -153,7 +153,7 @@ class LetterSelectionScreen(object):
             )
         )
 
-        number_2 = self.number_font.render('2', True, self.BLUE)
+        number_2 = self.number_font.render('2', True, BLUE)
         number_2_rect = number_2.get_rect(
             center=(text_2_rect.centerx, text_2_rect.bottom + padding)
         )
@@ -174,7 +174,7 @@ class LetterSelectionScreen(object):
         )
         underscore_end = (underscore_start[0] + underscore_width, underscore_start[1])
         pygame.draw.line(
-            screen, self.BLACK, underscore_start, underscore_end, underscore_height
+            screen, BLACK, underscore_start, underscore_end, underscore_height
         )
 
     def draw_tick(self, rect):
@@ -285,9 +285,9 @@ class LetterSelectionScreen(object):
                     # Re-adjust the font size if needed
                     self.font = pygame.font.Font(self.font_path, self.font_size)
 
-            self.screen.fill(self.WHITE)
+            self.screen.fill(WHITE)
             self.draw_grid(self.n_rows, self.n_cols)
-            self.draw_grid_lines(self.n_rows, self.n_cols, self.VERY_LIGHT_GREY)
+            self.draw_grid_lines(self.n_rows, self.n_cols, VERY_LIGHT_GREY)
 
             pygame.display.flip()
 
