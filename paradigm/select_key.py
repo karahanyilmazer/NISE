@@ -419,6 +419,8 @@ class LetterSelectionScreen(object):
                             self.key_list = []
                             self.highlighted_row = None
                             self.highlighted_col = None
+                    elif event.key == pygame.K_ESCAPE:
+                        self.running = False
 
             # Clear the screen
             self.screen.fill(WHITE)
