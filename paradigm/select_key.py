@@ -357,9 +357,6 @@ class LetterSelectionScreen(object):
                     text_rect = text.get_rect(center=rect.center)
                     self.screen.blit(text, text_rect)
 
-    def show_letter(self):
-        pass
-
     def render_text(self, text, position, color=WHITE, background=None):
         text_surface = self.font.render(text, True, color, background)
         text_rect = text_surface.get_rect(center=position)
@@ -428,9 +425,14 @@ class LetterSelectionScreen(object):
                             self.selecting_col = True  # Switch back to row selection
 
                         if len(self.key_list) == 3:
-                            print(self.key_list)
-                            self.show_letter()
-                            self.word_list.append(self.get_letter(self.key_list))
+                            letter = self.get_letter(self.key_list)
+                            if letter not in ('backspace', 'send'):
+                                self.word_list.append(letter)
+                            elif letter == 'backspace':
+                                self.word_list.pop()
+                            elif letter == 'send':
+                                pass
+
                             self.key_list = []
 
             # Clear the screen
