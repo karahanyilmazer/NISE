@@ -47,9 +47,6 @@ class LetterSelectionScreen(object):
             2 * (self.screen_height - self.header_height) // (2 * self.n_rows - 1)
         )
 
-        # self.index_row_height = self.screen_height // (2 * self.n_rows - 1)
-        # self.row_height = 2 * self.screen_height // (2 * self.n_rows - 1)
-
         self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
         self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
@@ -370,23 +367,22 @@ class LetterSelectionScreen(object):
 
                 elif event.type == pygame.VIDEORESIZE:
                     # The window has been resized, so resize the grid
-                    screen_width, screen_height = event.size
+                    self.screen_width, self.screen_height = event.size
                     self.screen = pygame.display.set_mode(
-                        (screen_width, screen_height), pygame.RESIZABLE
+                        (self.screen_width, self.screen_height), pygame.RESIZABLE
                     )
 
-                    self.index_row_height = screen_height // (
-                        2 * self.n_rows - 1
-                    )  # Half the size for the index row
-                    self.index_col_width = screen_width // (
-                        2 * self.n_cols - 1
-                    )  # Half the size for the index column
+                    self.index_row_height = (
+                        self.screen_height - self.header_height
+                    ) // (2 * self.n_rows - 1)
                     self.row_height = (
-                        2 * screen_height // (2 * self.n_rows - 1)
-                    )  # Remaining rows
-                    self.col_width = (
-                        2 * screen_width // (2 * self.n_cols - 1)
-                    )  # Remaining columns
+                        2
+                        * (self.screen_height - self.header_height)
+                        // (2 * self.n_rows - 1)
+                    )
+
+                    self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
+                    self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     # Adjust to account for the additional row and column
