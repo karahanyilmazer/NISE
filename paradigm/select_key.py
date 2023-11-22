@@ -25,9 +25,8 @@ class LetterSelectionScreen(object):
 
         self.screen_width, self.screen_height = 800, 600
         self.header_height = 60  # Height of the header space to display selected keys
-        self.screen_height += (
-            self.header_height
-        )  # Increase overall screen height to accommodate the header
+        # Increase overall screen height to accommodate the header
+        self.screen_height += self.header_height
 
         self.screen = pygame.display.set_mode(
             (self.screen_width, self.screen_height), pygame.RESIZABLE
@@ -50,7 +49,7 @@ class LetterSelectionScreen(object):
         self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
         self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
-        self.selecting_col = False
+        self.selecting_col = True
         self.highlighted_row = None
         self.highlighted_col = None
 
@@ -92,34 +91,34 @@ class LetterSelectionScreen(object):
         self.letter_dict = {
             'A': [1, 1, 1],
             'B': [1, 1, 2],
-            'C': [1, 2, 1],
-            'D': [1, 2, 2],
-            'E': [1, 3, 1],
-            'F': [1, 3, 2],
-            'G': [1, 4, 1],
-            'H': [1, 4, 2],
-            'I': [2, 1, 1],
-            'J': [2, 1, 2],
+            'C': [2, 1, 1],
+            'D': [2, 1, 2],
+            'E': [3, 1, 1],
+            'F': [3, 1, 2],
+            'G': [4, 1, 1],
+            'H': [4, 1, 2],
+            'I': [1, 2, 1],
+            'J': [1, 2, 2],
             'K': [2, 2, 1],
             'L': [2, 2, 2],
-            'M': [2, 3, 1],
-            'N': [2, 3, 2],
-            'O': [2, 4, 1],
-            'P': [2, 4, 2],
-            'Q': [3, 1, 1],
-            'R': [3, 1, 2],
-            'S': [3, 2, 1],
-            'T': [3, 2, 2],
+            'M': [3, 2, 1],
+            'N': [3, 2, 2],
+            'O': [4, 2, 1],
+            'P': [4, 2, 2],
+            'Q': [1, 3, 1],
+            'R': [1, 3, 2],
+            'S': [2, 3, 1],
+            'T': [2, 3, 2],
             'U': [3, 3, 1],
             'V': [3, 3, 2],
-            'W': [3, 4, 1],
-            'X': [3, 4, 2],
-            'Y': [4, 1, 1],
-            'Z': [4, 1, 2],
-            '.': [4, 2, 1],
-            '?': [4, 2, 2],
-            ' ': [4, 3, 1],
-            'backspace': [4, 3, 2],
+            'W': [4, 3, 1],
+            'X': [4, 3, 2],
+            'Y': [1, 4, 1],
+            'Z': [1, 4, 2],
+            '.': [2, 4, 1],
+            '?': [2, 4, 2],
+            ' ': [3, 4, 1],
+            'backspace': [3, 4, 2],
             'send': [4, 4, 1],
         }
 
@@ -400,12 +399,8 @@ class LetterSelectionScreen(object):
                         index = int(event.unicode) - 1  # Convert key to 0-based index
                         if self.selecting_col:
                             self.highlighted_col = index
-                            self.selecting_col = (
-                                False  # Next selection will be a column
-                            )
                         else:
                             self.highlighted_row = index
-                            self.selecting_col = True  # Switch back to row selection
 
                         if len(self.key_list) == 3:
                             letter = self.get_letter(self.key_list)
@@ -421,6 +416,12 @@ class LetterSelectionScreen(object):
                             self.highlighted_col = None
                     elif event.key == pygame.K_ESCAPE:
                         self.running = False
+
+            # Check if we are selecting a row or column
+            if len(self.key_list) in (0, 2):
+                self.selecting_col = True
+            elif len(self.key_list) == 1:
+                self.selecting_col = False
 
             # Clear the screen
             self.screen.fill(WHITE)
