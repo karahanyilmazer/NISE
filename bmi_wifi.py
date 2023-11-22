@@ -7,9 +7,9 @@ from shared_memory_dict import SharedMemoryDict
 
 # %%
 # # Function for sending command in binary mode
-# def send_command(command):
-#     # Send the command over the socket connection
-#     arduino_sock.sendall(command.encode())
+def send_command(command):
+    # Send the command over the socket connection
+    arduino_sock.sendall(command.encode())
 
 
 # Replace with the IP address of ESP32
@@ -17,15 +17,18 @@ arduino_host = '192.168.43.223'
 # Replace with the port number used for Arduino communication
 arduino_port = 25002
 
-# Create socket connection
-# arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# arduino_sock.connect((arduino_host, arduino_port))
 
+# Create socket connection
+arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+arduino_sock.connect((arduino_host, arduino_port))
+print('Connection Set')
 # Wait for game initialization
 time.sleep(3)
 
 # Set up serial connection port
-port = serial.Serial('COM5', baudrate=115200)  # Windows
+#port = serial.Serial('COM5', baudrate=115200)  # Windows
+port = serial.Serial('/dev/ttyUSB0', baudrate=115200)  # Linux
+
 
 # Shared memory for communicating between different scripts
 smd = SharedMemoryDict(name='msg', size=1024)
@@ -33,8 +36,9 @@ smd['sensor_1'] = 0
 smd['sensor_2'] = 0
 smd['sensor_3'] = 0
 smd['sensor_4'] = 0
-
+print('flamina')
 # %%
+
 while True:
     try:
         line = port.readline().decode('utf-8')
@@ -43,6 +47,7 @@ while True:
 
     # Split the line into individual sensor values
     sensor_values = line.split(',')
+
     try:
         sensorValue1, sensorValue2, sensorValue3, sensorValue4 = sensor_values
         # Convert to integer if necessary
@@ -63,8 +68,8 @@ while True:
         else:
             smd[f'sensor_{i + 1}'] = 0
 
-    # send_command(sensorValue1, sensorValue2, sensorValue3, sensorValue4)
-    # send_command(sender)
-    # print(sender)
+    #send_command(sensorValue1, sensorValue2, sensorValue3, sensorValue4)
+    send_command(sender)
+    print(sender)
 
 # %%
