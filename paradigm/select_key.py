@@ -1,8 +1,7 @@
 # %%
+import socket
 import sys
 from os import path
-import socket
-
 
 import pygame
 
@@ -20,7 +19,7 @@ class LetterSelectionScreen(object):
     def __init__(self):
         pygame.init()
         current_dir = path.dirname(path.abspath(__file__))
-        
+
         # Construct the path to the font file
         self.font_path = path.join(current_dir, 'materials', 'EsseGrotesk.otf')
         self.font_size = 48
@@ -366,7 +365,7 @@ class LetterSelectionScreen(object):
         # Set up the client
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host = '127.0.0.2'  # Change this to the IP address of your server
-        port = 12345         # Choose the same port number as in the ser
+        port = 12345  # Choose the same port number as in the server
 
         client_socket.connect((host, port))
         while self.running:
@@ -439,27 +438,19 @@ class LetterSelectionScreen(object):
                             self.highlighted_col = None
                     elif event.key == pygame.K_ESCAPE:
                         self.running = False
-            
+
             # Receive a message from the server
             data_from_server = client_socket.recv(4)
             index = int.from_bytes(data_from_server, byteorder='big')
-            print(index)
+
             print(f"Received from server: {index}")
 
-                        
-                        
-            
-            #print(index)
-            if index == 0:
-                pass
-            else:
+            if index != 0:
                 self.key_list.append(index)
                 if self.selecting_col:
-                    #print('col')
-                    self.highlighted_col = index-1
+                    self.highlighted_col = index - 1
                 else:
-                    #print('row')
-                    self.highlighted_row = index-1
+                    self.highlighted_row = index - 1
                 if len(self.key_list) == 3:
                     letter = self.get_letter(self.key_list)
                     if letter not in ('backspace', 'send'):
@@ -471,7 +462,6 @@ class LetterSelectionScreen(object):
                     self.key_list = []
                     self.highlighted_row = None
                     self.highlighted_col = None
-
             index = 0
 
             # Check if we are selecting a row or column
