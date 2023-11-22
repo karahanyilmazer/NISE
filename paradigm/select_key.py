@@ -24,6 +24,11 @@ class LetterSelectionScreen(object):
         self.number_font_size = self.font_size // 2
 
         self.screen_width, self.screen_height = 800, 600
+        self.header_height = 60  # Height of the header space to display selected keys
+        self.screen_height += (
+            self.header_height
+        )  # Increase overall screen height to accommodate the header
+
         self.screen = pygame.display.set_mode(
             (self.screen_width, self.screen_height), pygame.RESIZABLE
         )
@@ -33,9 +38,19 @@ class LetterSelectionScreen(object):
         self.number_font = pygame.font.Font(self.font_path, self.number_font_size)
 
         self.n_rows, self.n_cols = 5, 5  # Including index rows and columns
-        self.index_row_height = self.screen_height // (2 * self.n_rows - 1)
+
+        # Recalculate the grid size based on the new screen height
+        self.index_row_height = (self.screen_height - self.header_height) // (
+            2 * self.n_rows - 1
+        )
+        self.row_height = (
+            2 * (self.screen_height - self.header_height) // (2 * self.n_rows - 1)
+        )
+
+        # self.index_row_height = self.screen_height // (2 * self.n_rows - 1)
+        # self.row_height = 2 * self.screen_height // (2 * self.n_rows - 1)
+
         self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
-        self.row_height = 2 * self.screen_height // (2 * self.n_rows - 1)
         self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
         self.selecting_col = False
@@ -54,6 +69,7 @@ class LetterSelectionScreen(object):
         self.running = True
 
         self.key_list = []
+        self.word_list = []
 
         self.letter_dict = {
             'A': [1, 1, 1],
@@ -84,9 +100,15 @@ class LetterSelectionScreen(object):
             'Z': [4, 1, 2],
             '.': [4, 2, 1],
             '?': [4, 2, 2],
-            'space': [4, 3, 1],
+            ' ': [4, 3, 1],
             'send': [4, 3, 2],
         }
+
+    def get_letter(self, keys):
+        for letter, key_combo in self.letter_dict.items():
+            if key_combo == keys:
+                return letter
+        return None  # Return None if no matching letter is found
 
     def color_cell(self, row, col):
         # Create a transparent surface for the highlights
@@ -96,7 +118,11 @@ class LetterSelectionScreen(object):
 
         # Calculate the top-left position of the cell
         x = self.index_col_width + (col - 1) * self.col_width if col > 0 else 0
-        y = self.index_row_height + (row - 1) * self.row_height if row > 0 else 0
+        y = (
+            self.header_height + self.index_row_height + (row - 1) * self.row_height
+            if row > 0
+            else self.header_height
+        )
 
         # Adjust the size for index row and column
         width = self.index_col_width if col == 0 else self.col_width
@@ -225,7 +251,8 @@ class LetterSelectionScreen(object):
     def draw_grid_lines(self, n_rows, n_cols, color):
         # Draw horizontal lines
         for row in range(n_rows):  # +1 to account for the index row
-            y = self.index_row_height + row * self.row_height
+            y = self.header_height + self.index_row_height + row * self.row_height
+            # y = self.index_row_height + row * self.row_height
             start_pos = (0, y)
             end_pos = (self.screen_width, y)
             # Draw a thicker line for the index row
@@ -235,7 +262,7 @@ class LetterSelectionScreen(object):
         # Draw vertical lines
         for col in range(n_cols):  # +1 to account for the index column
             x = self.index_col_width + col * self.col_width
-            start_pos = (x, 0)
+            start_pos = (x, self.header_height)
             end_pos = (x, self.screen_height)
             # Draw a thicker line for the index column
             line_width = 3 if col > 0 else 5
@@ -282,6 +309,11 @@ class LetterSelectionScreen(object):
     def show_letter(self):
         pass
 
+    def render_text(self, text, position, color=WHITE, background=None):
+        text_surface = self.font.render(text, True, color, background)
+        text_rect = text_surface.get_rect(center=position)
+        self.screen.blit(text_surface, text_rect)
+
     def run(self):
         while self.running:
             for event in pygame.event.get():
@@ -315,10 +347,12 @@ class LetterSelectionScreen(object):
                         col = 0
                     else:
                         col = (mx - self.index_col_width) // self.col_width + 1
-                    if my < self.index_row_height:
+                    if my < self.index_row_height + self.header_height:
                         row = 0
                     else:
-                        row = (my - self.index_row_height) // self.row_height + 1
+                        row = (
+                            my - (self.index_row_height + self.header_height)
+                        ) // self.row_height + 1
 
                     # Highlight only if a valid grid cell (not an index cell) is clicked
                     if row > 0 and col > 0:
@@ -330,7 +364,7 @@ class LetterSelectionScreen(object):
 
                 elif event.type == pygame.KEYDOWN:
                     if event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]:
-                        self.key_list.append(event.key)
+                        self.key_list.append(event.key - 48)
 
                         index = int(event.unicode) - 1  # Convert key to 0-based index
                         if self.selecting_col:
@@ -343,9 +377,21 @@ class LetterSelectionScreen(object):
                             self.selecting_col = True  # Switch back to row selection
 
                         if len(self.key_list) == 3:
+                            print(self.key_list)
                             self.show_letter()
+                            self.word_list.append(self.get_letter(self.key_list))
+                            self.key_list = []
 
+            # Clear the screen
             self.screen.fill(WHITE)
+            # Draw the header background
+            pygame.draw.rect(
+                self.screen, BLACK, (0, 0, self.screen_width, self.header_height)
+            )
+            self.render_text(
+                ''.join(self.word_list),
+                (self.screen_width // 2, self.header_height // 2),
+            )
             self.draw_grid(self.n_rows, self.n_cols)
             self.draw_grid_lines(self.n_rows, self.n_cols, VERY_LIGHT_GREY)
 
@@ -358,3 +404,5 @@ class LetterSelectionScreen(object):
 if __name__ == "__main__":
     game = LetterSelectionScreen()
     game.run()
+
+# %%
