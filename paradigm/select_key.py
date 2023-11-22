@@ -434,6 +434,8 @@ class LetterSelectionScreen(object):
                                 pass
 
                             self.key_list = []
+                            self.highlighted_row = None
+                            self.highlighted_col = None
 
             # Clear the screen
             self.screen.fill(WHITE)
