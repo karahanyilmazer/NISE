@@ -1,6 +1,8 @@
 # %%
 import sys
 from os import path
+import socket
+
 
 import pygame
 
@@ -17,13 +19,14 @@ VERY_LIGHT_GREY = (220, 220, 220)
 class LetterSelectionScreen(object):
     def __init__(self):
         pygame.init()
-        self.font_path = path.join(
-            path.abspath(__file__), '..', 'materials', 'EsseGrotesk.otf'
-        )
+        current_dir = path.dirname(path.abspath(__file__))
+        
+        # Construct the path to the font file
+        self.font_path = path.join(current_dir, 'materials', 'EsseGrotesk.otf')
         self.font_size = 48
         self.number_font_size = self.font_size // 2
 
-        self.screen_width, self.screen_height = 800, 600
+        self.screen_width, self.screen_height = 2000, 1600
         self.header_height = 60  # Height of the header space to display selected keys
         # Increase overall screen height to accommodate the header
         self.screen_height += self.header_height
@@ -61,17 +64,13 @@ class LetterSelectionScreen(object):
 
         self.image_size = min(self.row_height // 2, self.col_width // 2)
 
-        self.tick_image_path = path.join(
-            path.abspath(__file__), '..', 'materials', 'tick.png'
-        )
+        self.tick_image_path = path.join(current_dir, 'materials', 'tick.png')
         self.tick_image = pygame.image.load(self.tick_image_path)
         self.tick_image = pygame.transform.scale(
             self.tick_image, (self.image_size, self.image_size)
         )
 
-        self.back_image_path = path.join(
-            path.abspath(__file__), '..', 'materials', 'backspace.png'
-        )
+        self.back_image_path = path.join(current_dir, 'materials', 'backspace.png')
         self.back_image = pygame.image.load(self.back_image_path)
         aspect_ratio = self.back_image.get_width() / self.back_image.get_height()
         new_height = int(self.image_size / aspect_ratio)
@@ -79,9 +78,8 @@ class LetterSelectionScreen(object):
             self.back_image, (self.image_size, new_height)
         )
 
-        self.space_image_path = path.join(
-            path.abspath(__file__), '..', 'materials', 'space.png'
-        )
+        self.space_image_path = path.join(current_dir, 'materials', 'space.png')
+
         self.space_image = pygame.image.load(self.space_image_path)
         aspect_ratio = self.space_image.get_width() / self.space_image.get_height()
         new_height = int(self.image_size / aspect_ratio)
@@ -365,6 +363,12 @@ class LetterSelectionScreen(object):
                     pygame.draw.circle(self.screen, BLUE, position, 10, 2)
 
     def run(self):
+        # Set up the client
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host = '127.0.0.2'  # Change this to the IP address of your server
+        port = 12345         # Choose the same port number as in the ser
+
+        client_socket.connect((host, port))
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -435,6 +439,40 @@ class LetterSelectionScreen(object):
                             self.highlighted_col = None
                     elif event.key == pygame.K_ESCAPE:
                         self.running = False
+            
+            # Receive a message from the server
+            data_from_server = client_socket.recv(4)
+            index = int.from_bytes(data_from_server, byteorder='big')
+            print(index)
+            print(f"Received from server: {index}")
+
+                        
+                        
+            
+            #print(index)
+            if index == 0:
+                pass
+            else:
+                self.key_list.append(index)
+                if self.selecting_col:
+                    #print('col')
+                    self.highlighted_col = index-1
+                else:
+                    #print('row')
+                    self.highlighted_row = index-1
+                if len(self.key_list) == 3:
+                    letter = self.get_letter(self.key_list)
+                    if letter not in ('backspace', 'send'):
+                        self.word_list.append(letter)
+                    elif letter == 'backspace':
+                        self.word_list.pop()
+                    elif letter == 'send':
+                        pass
+                    self.key_list = []
+                    self.highlighted_row = None
+                    self.highlighted_col = None
+
+            index = 0
 
             # Check if we are selecting a row or column
             if len(self.key_list) in (0, 2):
