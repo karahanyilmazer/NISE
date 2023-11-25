@@ -15,7 +15,7 @@ import socket
 
 # Set up the server
 int_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = '127.0.0.2'  # Change this to the IP address of your server
+host = '127.0.0.1'  # Change this to the IP address of your server
 port = 12345         # Choose a port number
 
 int_socket.bind((host, port))
@@ -36,7 +36,7 @@ print(f"Connection from {client_address}")
 
 
 # Replace with the IP address of ESP32
-arduino_host = '192.168.43.223'
+arduino_host = '192.168.27.5' #'192.168.43.223'
 # Replace with the port number used for Arduino communication
 arduino_port = 25002
 
@@ -49,8 +49,8 @@ print('Connection Set')
 time.sleep(3)
 
 # Set up serial connection port
-#port = serial.Serial('COM5', baudrate=115200)  # Windows
-port = serial.Serial('/dev/ttyUSB0', baudrate=115200)  # Linux
+port = serial.Serial('COM7', baudrate=115200)  # Windows
+# port = serial.Serial('/dev/ttyUSB0', baudrate=115200)  # Linux
 
 
 # Shared memory for communicating between different scripts
@@ -60,6 +60,8 @@ port = serial.Serial('/dev/ttyUSB0', baudrate=115200)  # Linux
 
 print('flamina')
 shooter = 0
+letter = []
+# counter = 0
 # %%
 
 while True:
@@ -91,7 +93,6 @@ while True:
         
 
     # past_ind = interm
-    # counter = counter +1
 
     if shooter != 0:
         if int(interm) == 0:
@@ -103,21 +104,35 @@ while True:
         if int(interm) != 0:
             sender = int(interm)
             shooter = 1
+            letter.append(interm)
+
         else:
             sender = 0
             shooter = 0
 
+        if len(letter) == 6:
+            # send_command(letter)
+            if letter[3:6] == ['4','4','1']:
+                letter = letter[0:3]
+            # elif letter[3:6] == ['3','4','2']:
+            else:
+                letter = []
+            # print(letter)
+            send_command(''.join(letter))
+            # print(''.join(letter))
+            letter = []
+
+    # print(letter)
     #smd['sensor'] = sender
 
     
     #if smd['sending'] == True:
     ##  send_command(sensorValue1, sensorValue2, sensorValue3, sensorValue4)
-    #    send_command(sender)
+        # send_command(interm)
         
     if sender != 0:
         client_socket.sendall(sender.to_bytes(4, byteorder='big'))
-        print(sender)
-
+        # print(sender)
 
 # Close the sockets
 client_socket.close()
