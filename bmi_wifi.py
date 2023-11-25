@@ -61,6 +61,7 @@ port = serial.Serial('COM7', baudrate=115200)  # Windows
 print('flamina')
 shooter = 0
 letter = []
+bufferL = []
 # counter = 0
 # %%
 
@@ -112,15 +113,15 @@ while True:
 
         if len(letter) == 6:
             # send_command(letter)
-            if letter[3:6] == ['4','4','1']:
-                letter = letter[0:3]
-            # elif letter[3:6] == ['3','4','2']:
-            else:
+            if letter[3:6] == ['3','4','2']:
                 letter = []
+            # elif letter[3:6] == ['3','4','2']:
             # print(letter)
-            send_command(''.join(letter))
+            else:
+                send_command(''.join(letter[0:3]))
+                letter = letter[3:6] 
             # print(''.join(letter))
-            letter = []
+            # letter = []
 
     # print(letter)
     #smd['sensor'] = sender

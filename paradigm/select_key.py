@@ -486,6 +486,7 @@ class LetterSelectionScreen(object):
 
             pygame.display.flip()
 
+        client_socket.close()
         pygame.quit()
         sys.exit()
 
