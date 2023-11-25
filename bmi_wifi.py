@@ -118,6 +118,7 @@ while True:
             # elif letter[3:6] == ['3','4','2']:
             # print(letter)
             else:
+                print(letter)
                 send_command(''.join(letter[0:3]))
                 letter = letter[3:6] 
             # print(''.join(letter))
