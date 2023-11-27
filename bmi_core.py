@@ -23,7 +23,7 @@ print("message: %s" % MESSAGE)
 number_vibros = 4
 intensity_array = [0, 0, 0, 0]
 
-port = serial.Serial("COM5", baudrate=115200)  # Windows
+port = serial.Serial("COM7", baudrate=115200)  # Windows
 # port = serial.Serial('/dev/ttyUSB0')  # Linux
 
 # %%
@@ -33,13 +33,16 @@ while True:
 
     # Split the line into individual sensor values
     sensor_values = line.split(",")
-    sensorValue1, sensorValue2, sensorValue3, sensorValue4 = sensor_values
+    try:
+        sensorValue1, sensorValue2, sensorValue3, sensorValue4 = sensor_values
+        # Convert to integer if necessary
+        sensorValue1 = int(sensorValue1)
+        sensorValue2 = int(sensorValue2)
+        sensorValue3 = int(sensorValue3)
+        sensorValue4 = int(sensorValue4)
+    except ValueError:
+        sensorValue1, sensorValue2, sensorValue3, sensorValue4 = 0,0,0,0
 
-    # Convert to integer if necessary
-    sensorValue1 = int(sensorValue1)
-    sensorValue2 = int(sensorValue2)
-    sensorValue3 = int(sensorValue3)
-    sensorValue4 = int(sensorValue4)
 
     print(sensorValue1, sensorValue2, sensorValue3, sensorValue4)
 
