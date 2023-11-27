@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
-const char* ssid = "Mi Phone";      // Replace with your access point SSID
-const char* password = "12341234";  // Replace with your access point password
+const char* ssid = "Galaxy S20 FE4652";//"PYUR 122A2";      // Replace with your access point SSID
+const char* password = "azao6016";//"nx5rpttK2dXk";  // Replace with your access point password
 
 const int arduinoPort = 25002;      // Port to listen on
 
@@ -42,30 +42,46 @@ void setup() {
 void loop() {
   // Check for UDP packets
   int packetSize = udp.parsePacket();
+  char buffer[3];
   if (packetSize) {
     // Read incoming data from the UDP packet
-    char command = udp.read();
+    udp.read(buffer, sizeof(buffer));
+    String command = String(buffer);
     executeCommand(command);
   }
+
+  udp.read(buffer, sizeof(buffer));
+//    buffer[packetSize] = '\0';  // Null-terminate the string
+
+    String commandString = String(buffer);
 
   // Process other tasks
   // ...
 }
 
-void executeCommand(char command) {
-  
-  switch (command) {
+void executeCommand(String command) {
+  for (int i = 0; i <= 2; i++) {
+    char element = command[i];
+    switch (element) {
     case '1':  // Command to turn on the motor
       digitalWrite(motorPin1, HIGH);  // Turn on the motor
+      delay(500);
+      digitalWrite(motorPin1, LOW);  // Turn on the motor
       break;
     case '2':  // Command to turn off the motor
       digitalWrite(motorPin2, HIGH);  // Turn off the motor
+      delay(500);
+      digitalWrite(motorPin2, LOW);  // Turn on the motor
       break;
     case '3':  // Command to turn on the motor
       digitalWrite(motorPin3, HIGH);  // Turn on the motor
+      delay(500);
+      digitalWrite(motorPin3, LOW);  // Turn on the motor
       break;
     case '4':  // Command to turn off the motor
       digitalWrite(motorPin4, HIGH);  // Turn off the motor
+      delay(500);
+      digitalWrite(motorPin4, LOW);  // Turn on the motor
       break;
     default:
       digitalWrite(motorPin1, LOW);  // Turn on the motor
@@ -74,4 +90,7 @@ void executeCommand(char command) {
       digitalWrite(motorPin4, LOW);  // Turn on the motor
       break;
   }
+  delay(250);
+  }
+//  command = "";
 }
