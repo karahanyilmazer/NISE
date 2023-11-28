@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
-const char* ssid = "Galaxy S20 FE4652";//"PYUR 122A2";      // Replace with your access point SSID
-const char* password = "azao6016";//"nx5rpttK2dXk";  // Replace with your access point password
+const char* ssid = "Mi Phone";//"PYUR 122A2";      // Replace with your access point SSID
+const char* password = "12341234";//"nx5rpttK2dXk";  // Replace with your access point password
 
 const int arduinoPort = 25002;      // Port to listen on
 

@@ -16,7 +16,7 @@ import socket
 # Set up the server
 int_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = '127.0.0.1'  # Change this to the IP address of your server
-port = 12345         # Choose a port number
+port = 12345      # Choose a port number
 
 int_socket.bind((host, port))
 int_socket.listen(1)
@@ -36,7 +36,7 @@ print(f"Connection from {client_address}")
 
 
 # Replace with the IP address of ESP32
-arduino_host = '192.168.27.5' #'192.168.43.223'
+arduino_host = '192.168.43.241' #'192.168.27.5'
 # Replace with the port number used for Arduino communication
 arduino_port = 25002
 
@@ -46,11 +46,11 @@ arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 arduino_sock.connect((arduino_host, arduino_port))
 print('Connection Set')
 # Wait for game initialization
-time.sleep(3)
+time.sleep(1)
 
 # Set up serial connection port
-port = serial.Serial('COM7', baudrate=115200)  # Windows
-# port = serial.Serial('/dev/ttyUSB0', baudrate=115200)  # Linux
+# port = serial.Serial('COM7', baudrate=115200)  # Windows
+port = serial.Serial('/dev/ttyUSB0', baudrate=115200)  # Linux
 
 
 # Shared memory for communicating between different scripts
@@ -58,7 +58,9 @@ port = serial.Serial('COM7', baudrate=115200)  # Windows
 #smd['sensor'] = 0
 #smd['sending'] = False
 
-print('flamina')
+print('All Connections Completed')
+
+useless_list = [['4', '4', '2']]
 shooter = 0
 letter = []
 bufferL = []
@@ -71,6 +73,7 @@ while True:
     except KeyboardInterrupt:
         break
 
+    
     # Split the line into individual sensor values
     sensor_values = line.split(',')
 
@@ -115,6 +118,10 @@ while True:
             # send_command(letter)
             if letter[3:6] == ['3','4','2']:
                 letter = []
+
+            elif letter[3:6] in useless_list or letter[5]=='3' or letter[5]=='4':
+                letter = letter[0:3]
+                print(letter)
             # elif letter[3:6] == ['3','4','2']:
             # print(letter)
             else:
@@ -124,7 +131,7 @@ while True:
             # print(''.join(letter))
             # letter = []
 
-    # print(letter)
+    #print(letter)
     #smd['sensor'] = sender
 
     
