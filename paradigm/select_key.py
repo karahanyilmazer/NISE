@@ -4,8 +4,16 @@ import sys
 from os import path
 
 import pygame
+import csv
+from datetime import datetime
+import os
 
 # %%
+curr_path = os.getcwd()
+data_path = r'/home/muhammed/Desktop/NISE/csv_data'
+os.chdir(data_path)
+run_num = sum("run_encoder" in f_name for f_name in os.listdir()) + 1
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 BLUE = (37, 122, 196)
@@ -25,7 +33,7 @@ class LetterSelectionScreen(object):
         self.font_size = 48
         self.number_font_size = self.font_size // 2
 
-        self.screen_width, self.screen_height = 1800, 1000 #2000, 1600     
+        self.screen_width, self.screen_height = 3000, 1500 #2000, 1600     
         self.header_height = 60  # Height of the header space to display selected keys
         # Increase overall screen height to accommodate the header
         self.screen_height += self.header_height
@@ -57,7 +65,7 @@ class LetterSelectionScreen(object):
         self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
         self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
-        self.selecting_col = True
+        self.selecting_row = True
         self.highlighted_row = None
         self.highlighted_col = None
 
@@ -86,42 +94,80 @@ class LetterSelectionScreen(object):
             self.space_image, (self.image_size, new_height)
         )
 
+        self.csv_list = []
+
         self.running = True
 
         self.key_list = []
         self.word_list = []
 
+        # Column selection first
+        # self.letter_dict = {
+        #     'A': [1, 1, 1],
+        #     'B': [1, 1, 2],
+        #     'C': [2, 1, 1],
+        #     'D': [2, 1, 2],
+        #     'E': [3, 1, 1],
+        #     'F': [3, 1, 2],
+        #     'G': [4, 1, 1],
+        #     'H': [4, 1, 2],
+        #     'I': [1, 2, 1],
+        #     'J': [1, 2, 2],
+        #     'K': [2, 2, 1],
+        #     'L': [2, 2, 2],
+        #     'M': [3, 2, 1],
+        #     'N': [3, 2, 2],
+        #     'O': [4, 2, 1],
+        #     'P': [4, 2, 2],
+        #     'Q': [1, 3, 1],
+        #     'R': [1, 3, 2],
+        #     'S': [2, 3, 1],
+        #     'T': [2, 3, 2],
+        #     'U': [3, 3, 1],
+        #     'V': [3, 3, 2],
+        #     'W': [4, 3, 1],
+        #     'X': [4, 3, 2],
+        #     'Y': [1, 4, 1],
+        #     'Z': [1, 4, 2],
+        #     '.': [2, 4, 1],
+        #     '?': [2, 4, 2],
+        #     ' ': [3, 4, 1],
+        #     'backspace': [3, 4, 2],
+        #     'send': [4, 4, 1],
+        # }
+
+        # Row selection first
         self.letter_dict = {
             'A': [1, 1, 1],
             'B': [1, 1, 2],
-            'C': [2, 1, 1],
-            'D': [2, 1, 2],
-            'E': [3, 1, 1],
-            'F': [3, 1, 2],
-            'G': [4, 1, 1],
-            'H': [4, 1, 2],
-            'I': [1, 2, 1],
-            'J': [1, 2, 2],
+            'C': [1, 2, 1],
+            'D': [1, 2, 2],
+            'E': [1, 3, 1],
+            'F': [1, 3, 2],
+            'G': [1, 4, 1],
+            'H': [1, 4, 2],
+            'I': [2, 1, 1],
+            'J': [2, 1, 2],
             'K': [2, 2, 1],
             'L': [2, 2, 2],
-            'M': [3, 2, 1],
-            'N': [3, 2, 2],
-            'O': [4, 2, 1],
-            'P': [4, 2, 2],
-            'Q': [1, 3, 1],
-            'R': [1, 3, 2],
-            'S': [2, 3, 1],
-            'T': [2, 3, 2],
+            'M': [2, 3, 1],
+            'N': [2, 3, 2],
+            'O': [2, 4, 1],
+            'P': [2, 4, 2],
+            'Q': [3, 1, 1],
+            'R': [3, 1, 2],
+            'S': [3, 2, 1],
+            'T': [3, 2, 2],
             'U': [3, 3, 1],
             'V': [3, 3, 2],
-            'W': [4, 3, 1],
-            'X': [4, 3, 2],
-            'Y': [1, 4, 1],
-            'Z': [1, 4, 2],
-            '.': [2, 4, 1],
-            '?': [2, 4, 2],
-            ' ': [3, 4, 1],
-            'backspace': [3, 4, 2],
+            'W': [3, 4, 1],
+            'X': [3, 4, 2],
+            'Y': [4, 1, 1],
+            'Z': [4, 1, 2],
+            '.': [4, 2, 1],
+            '?': [4, 2, 2],
+            ' ': [4, 3, 1],
+            'backspace': [4, 3, 2],
             'send': [4, 4, 1],
         }
 
@@ -360,18 +406,29 @@ class LetterSelectionScreen(object):
                 pygame.draw.circle(self.screen, LIGHT_GREEN, position, 10, 2)
                 if i == 2:
                     pygame.draw.circle(self.screen, BLUE, position, 10, 2)
-
+        
     def run(self):
         # Set up the client
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host = '127.0.0.1'  # Change this to the IP address of your server
-        port = 12345  # Choose the same port number as in the server
+        port = 12346  # Choose the same port number as in the server
+
+        # Replace with the IP address of ESP32
+        arduino_host = '192.168.43.241'# '192.168.227.207' # #'192.168.27.5'
+        # Replace with the port number used for Arduino communication
+        arduino_port = 25002
+
+
+        # Create socket connection
+        arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        arduino_sock.connect((arduino_host, arduino_port))
 
         client_socket.connect((host, port))
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                    
 
                 elif event.type == pygame.VIDEORESIZE:
                     # The window has been resized, so resize the grid
@@ -419,10 +476,10 @@ class LetterSelectionScreen(object):
                         self.key_list.append(event.key - 48)
 
                         index = int(event.unicode) - 1  # Convert key to 0-based index
-                        if self.selecting_col:
-                            self.highlighted_col = index
-                        else:
+                        if self.selecting_row:
                             self.highlighted_row = index
+                        else:
+                            self.highlighted_col = index
 
                         if len(self.key_list) == 3:
                             letter = self.get_letter(self.key_list)
@@ -443,34 +500,43 @@ class LetterSelectionScreen(object):
             data_from_server = client_socket.recv(4)
             index = int.from_bytes(data_from_server, byteorder='big')
 
-            print(f"Received from server: {index}")
-
             if index != 0:
                 self.key_list.append(index)
-                if self.selecting_col:
-                    self.highlighted_col = index - 1
-                else:
+                if self.selecting_row:
                     self.highlighted_row = index - 1
+                else:
+                    self.highlighted_col = index - 1
                 if len(self.key_list) == 3:
                     letter = self.get_letter(self.key_list)
-                    if self.key_list[2] == '3' or self.key_list[2] == '4':
+
+                    # Send the command over the socket connection
+                    print_str = (self.key_list, letter, datetime.now())
+                    self.csv_list.append(print_str)
+                    print(print_str)
+
+                    if self.key_list[2] == 3 or self.key_list[2] == 4:
                         pass
-                    elif letter not in ('backspace', 'send'):
-                        self.word_list.append(letter)
-                    elif letter == 'backspace':
-                        self.word_list.pop()
-                    elif letter == 'send':
-                        pass
+
+                    elif letter != 'send':
+                        str_arduino = ''.join(str(num) for num in self.key_list[0:3])
+                        arduino_sock.sendall(str_arduino.encode())
+
+                        if letter != 'backspace':
+                            self.word_list.append(letter)
+                        else:
+                            self.word_list.pop()
+
                     self.key_list = []
                     self.highlighted_row = None
                     self.highlighted_col = None
+
             index = 0
 
             # Check if we are selecting a row or column
             if len(self.key_list) in (0, 2):
-                self.selecting_col = True
+                self.selecting_row = True
             elif len(self.key_list) == 1:
-                self.selecting_col = False
+                self.selecting_row = False
 
             # Clear the screen
             self.screen.fill(WHITE)
@@ -488,6 +554,12 @@ class LetterSelectionScreen(object):
 
             pygame.display.flip()
 
+        with open(f'run_encoder_{run_num}.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(self.csv_list)
+
+        os.chdir(curr_path)
+        
         client_socket.close()
         pygame.quit()
         sys.exit()

@@ -3,23 +3,25 @@ import socket
 import time
 
 import serial
+import csv
+from datetime import datetime
+import os
+import numpy as np
 #from shared_memory_dict import SharedMemoryDict
 
 # %%
-# # Function for sending command in binary mode
-def send_command(command):
-    # Send the command over the socket connection
-    arduino_sock.sendall(command.encode())
-
-import socket
-
 # Set up the server
 int_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = '127.0.0.1'  # Change this to the IP address of your server
-port = 12345      # Choose a port number
+port = 12346    # Choose a port number
 
 int_socket.bind((host, port))
 int_socket.listen(1)
+
+curr_path = os.getcwd()
+data_path = r'/home/muhammed/Desktop/NISE/csv_data'
+os.chdir(data_path)
+run_num = sum("run_decoder" in f_name for f_name in os.listdir()) + 1
 
 print(f"Server listening on {host}:{port}")
 
@@ -31,19 +33,44 @@ print(f"Connection from {client_address}")
 #message_to_client = "Hello, client! How are you?"
 
 
+# Row selection first
+letter_dict = {
+    'A': [1, 1, 1],
+    'B': [1, 1, 2],
+    'C': [1, 2, 1],
+    'D': [1, 2, 2],
+    'E': [1, 3, 1],
+    'F': [1, 3, 2],
+    'G': [1, 4, 1],
+    'H': [1, 4, 2],
+    'I': [2, 1, 1],
+    'J': [2, 1, 2],
+    'K': [2, 2, 1],
+    'L': [2, 2, 2],
+    'M': [2, 3, 1],
+    'N': [2, 3, 2],
+    'O': [2, 4, 1],
+    'P': [2, 4, 2],
+    'Q': [3, 1, 1],
+    'R': [3, 1, 2],
+    'S': [3, 2, 1],
+    'T': [3, 2, 2],
+    'U': [3, 3, 1],
+    'V': [3, 3, 2],
+    'W': [3, 4, 1],
+    'X': [3, 4, 2],
+    'Y': [4, 1, 1],
+    'Z': [4, 1, 2],
+    '.': [4, 2, 1],
+    '?': [4, 2, 2],
+    ' ': [4, 3, 1],
+    'backspace': [4, 3, 2],
+    'send': [4, 4, 1],
+}
 
 
 
 
-# Replace with the IP address of ESP32
-arduino_host = '192.168.43.241' #'192.168.27.5'
-# Replace with the port number used for Arduino communication
-arduino_port = 25002
-
-
-# Create socket connection
-arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-arduino_sock.connect((arduino_host, arduino_port))
 print('Connection Set')
 # Wait for game initialization
 time.sleep(1)
@@ -61,16 +88,24 @@ port = serial.Serial('/dev/ttyUSB0', baudrate=115200)  # Linux
 print('All Connections Completed')
 
 useless_list = [['4', '4', '2']]
-shooter = 0
-letter = []
+tmp = 0
+buffer = []
 bufferL = []
 # counter = 0
 # %%
 
+csv_list = []
+
 while True:
     try:
+        # time.sleep(0.1)
         line = port.readline().decode('utf-8')
     except KeyboardInterrupt:
+        with open(f'run_decoder_{run_num}.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(csv_list)
+        os.chdir(curr_path)
+
         break
 
     
@@ -84,65 +119,55 @@ while True:
         sensorValue2 = int(sensorValue2)
         sensorValue3 = int(sensorValue3)
         sensorValue4 = int(sensorValue4)
+        # sensorVal = np.array([sensorValue1, sensorValue2, sensorValue3, sensorValue4])
         sensorVal = [sensorValue1, sensorValue2, sensorValue3, sensorValue4]
     except ValueError:
-        # sensorValue1, sensorValue2, sensorValue3, sensorValue4 = 0,0,0,0
         sensorVal = [0, 0, 0, 0]
 
-    interm = '0'
+    force_idx = 0
+
     for i, sensorV in enumerate(sensorVal):
-        if int(sensorV) > 2500:
-            interm = str(i + 1)
+        if int(sensorV) > 3000:
+            force_idx = i + 1
 
-        
-
-    # past_ind = interm
-
-    if shooter != 0:
-        if int(interm) == 0:
-            shooter = 0
+    if tmp != 0:
+        if force_idx == 0:
+            tmp = 0
         else:
-            sender = 0
+            force_idx = 0
 
     else:
-        if int(interm) != 0:
-            sender = int(interm)
-            shooter = 1
-            letter.append(interm)
+        if force_idx != 0:
+            tmp = 1
+            buffer.append(force_idx)
 
         else:
-            sender = 0
-            shooter = 0
+            force_idx = 0
+            tmp = 0
 
-        if len(letter) == 6:
-            # send_command(letter)
-            if letter[3:6] == ['3','4','2']:
-                letter = []
 
-            elif letter[3:6] in useless_list or letter[5]=='3' or letter[5]=='4':
-                letter = letter[0:3]
-                print(letter)
-            # elif letter[3:6] == ['3','4','2']:
-            # print(letter)
+        if len(buffer) == 6:
+            # if buffer[3:6] == ['3','4','2']: # For column selection first
+            if buffer[3:6] == ['4','3','2']: # For row selection first
+                buffer = []
+
+            elif buffer[3:6] in useless_list or buffer[5]=='3' or buffer[5]=='4':
+                buffer = buffer[0:3]
+
             else:
-                print(letter)
-                send_command(''.join(letter[0:3]))
-                letter = letter[3:6] 
-            # print(''.join(letter))
-            # letter = []
+                for key, val in letter_dict.items():
+                    if val == buffer[3:6]:
+                        print_str = (val, key, datetime.now())
+                        print(print_str)
+                        csv_list.append(print_str)
 
-    #print(letter)
-    #smd['sensor'] = sender
-
-    
-    #if smd['sending'] == True:
-    ##  send_command(sensorValue1, sensorValue2, sensorValue3, sensorValue4)
-        # send_command(interm)
+                buffer = buffer[3:6]
         
-    if sender != 0:
-        client_socket.sendall(sender.to_bytes(4, byteorder='big'))
-        # print(sender)
 
+    if force_idx != 0:
+        time.sleep(0.1)
+        client_socket.sendall(force_idx.to_bytes(4, byteorder='big'))
+        
 # Close the sockets
 client_socket.close()
 int_socket.close()
