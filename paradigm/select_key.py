@@ -453,7 +453,7 @@ class LetterSelectionScreen(object):
                     self.highlighted_row = index - 1
                 if len(self.key_list) == 3:
                     letter = self.get_letter(self.key_list)
-                    if letter == 'useless1' or self.key_list[2] == '3' or self.key_list[2] == '4':
+                    if self.key_list[2] == '3' or self.key_list[2] == '4':
                         pass
                     elif letter not in ('backspace', 'send'):
                         self.word_list.append(letter)
