@@ -17,6 +17,16 @@ port = 12346  # Choose a port number
 int_socket.bind((host, port))
 int_socket.listen(1)
 
+# Replace with the IP address of ESP32
+arduino_host = '192.168.43.241'# '192.168.227.207' # #'192.168.27.5'
+# Replace with the port number used for Arduino communication
+arduino_port = 25002
+
+# Create socket connection
+arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+arduino_sock.connect((arduino_host, arduino_port))
+
+
 curr_path = os.getcwd()
 data_path = r'/home/muhammed/Desktop/NISE/csv_data'
 os.chdir(data_path)
