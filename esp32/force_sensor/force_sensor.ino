@@ -20,6 +20,8 @@ void loop() {
   sensorValue3 = analogRead(analogInPin3);
   sensorValue4 = analogRead(analogInPin4);
 
+  delay(100);
+
   // Print sensor values
   Serial.print(sensorValue1);
   Serial.print(",");
