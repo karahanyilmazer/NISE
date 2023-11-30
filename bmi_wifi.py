@@ -1,19 +1,18 @@
 # %%
+import csv
+import os
 import socket
 import time
-
-import serial
-import csv
 from datetime import datetime
-import os
+
 import numpy as np
-#from shared_memory_dict import SharedMemoryDict
+import serial
 
 # %%
 # Set up the server
 int_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = '127.0.0.1'  # Change this to the IP address of your server
-port = 12346    # Choose a port number
+port = 12346  # Choose a port number
 
 int_socket.bind((host, port))
 int_socket.listen(1)
@@ -28,10 +27,7 @@ print(f"Server listening on {host}:{port}")
 # Accept a connection
 client_socket, client_address = int_socket.accept()
 print(f"Connection from {client_address}")
-
-# Send a message to the client
-#message_to_client = "Hello, client! How are you?"
-
+print('Connection Set')
 
 # Row selection first
 letter_dict = {
@@ -69,22 +65,12 @@ letter_dict = {
 }
 
 
-
-
-print('Connection Set')
 # Wait for game initialization
 time.sleep(1)
 
 # Set up serial connection port
 # port = serial.Serial('COM7', baudrate=115200)  # Windows
 port = serial.Serial('/dev/ttyUSB0', baudrate=115200)  # Linux
-
-
-# Shared memory for communicating between different scripts
-#smd = SharedMemoryDict(name='msg', size=1024)
-#smd['sensor'] = 0
-#smd['sending'] = False
-
 print('All Connections Completed')
 
 useless_list = [['4', '4', '2']]
@@ -108,7 +94,6 @@ while True:
 
         break
 
-    
     # Split the line into individual sensor values
     sensor_values = line.split(',')
 
@@ -145,13 +130,12 @@ while True:
             force_idx = 0
             tmp = 0
 
-
         if len(buffer) == 6:
             # if buffer[3:6] == ['3','4','2']: # For column selection first
-            if buffer[3:6] == ['4','3','2']: # For row selection first
+            if buffer[3:6] == ['4', '3', '2']:  # For row selection first
                 buffer = []
 
-            elif buffer[3:6] in useless_list or buffer[5]=='3' or buffer[5]=='4':
+            elif buffer[3:6] in useless_list or buffer[5] == '3' or buffer[5] == '4':
                 buffer = buffer[0:3]
 
             else:
@@ -162,12 +146,11 @@ while True:
                         csv_list.append(print_str)
 
                 buffer = buffer[3:6]
-        
 
     if force_idx != 0:
         time.sleep(0.1)
         client_socket.sendall(force_idx.to_bytes(4, byteorder='big'))
-        
+
 # Close the sockets
 client_socket.close()
 int_socket.close()
