@@ -411,17 +411,7 @@ class LetterSelectionScreen(object):
         # Set up the client
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host = '127.0.0.1'  # Change this to the IP address of your server
-        port = 12346  # Choose the same port number as in the server
-
-        # Replace with the IP address of ESP32
-        arduino_host = '192.168.43.241'# '192.168.227.207' # #'192.168.27.5'
-        # Replace with the port number used for Arduino communication
-        arduino_port = 25002
-
-
-        # Create socket connection
-        arduino_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        arduino_sock.connect((arduino_host, arduino_port))
+        port = 12348  # Choose the same port number as in the server
 
         client_socket.connect((host, port))
         while self.running:
@@ -517,14 +507,11 @@ class LetterSelectionScreen(object):
                     if self.key_list[2] == 3 or self.key_list[2] == 4:
                         pass
 
-                    elif letter != 'send':
-                        str_arduino = ''.join(str(num) for num in self.key_list[0:3])
-                        arduino_sock.sendall(str_arduino.encode())
+                    elif letter not in ('backspace', 'send'):
+                        self.word_list.append(letter)
 
-                        if letter != 'backspace':
-                            self.word_list.append(letter)
-                        else:
-                            self.word_list.pop()
+                    elif letter == 'backspace':
+                        self.word_list.pop()
 
                     self.key_list = []
                     self.highlighted_row = None
