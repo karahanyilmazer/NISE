@@ -37,7 +37,7 @@ class LetterSelectionScreen(object):
             (100, self.header_height // 2),
         ]
 
-        self.n_boxes = 3
+        self.n_boxes = 4
         self.box_padding = 10
         self.letter_padding = 5
         self.box_width = (
@@ -308,8 +308,12 @@ class LetterSelectionScreen(object):
         """Handle the mouse click event."""
         # Determine which box has been clicked
         box_index = int(pos[0] // (self.box_width + self.box_padding))
+        print(len(self.letter_groups[box_index]))
         if box_index < len(self.letter_groups):
-            if len(self.letter_groups[box_index]) != 1:
+            if len(self.letter_groups[box_index]) == 0:
+                # Ignore empty boxes
+                pass
+            elif len(self.letter_groups[box_index]) != 1:
                 # Split the letters in the clicked box into four groups
                 self.letter_groups = self.split_letters_into_groups(
                     self.letter_groups[box_index]
