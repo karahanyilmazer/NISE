@@ -21,7 +21,7 @@ The determination of whether a sensor is pressed or not is made using a threshol
 the sensor sends a corresponding number to a communication script written in Python. Each received number is then relayed to the graphical user interface. 
 The interface displays a letter when three numbers are received, effectively translating the sensor inputs into a meaningful message.
 
-![Example Image](figures/Sender.png)
+![Figure 1: Circuit design of the machine encoder](figures/Sender.png)
 ## Decoder
 
 ## User Interface
