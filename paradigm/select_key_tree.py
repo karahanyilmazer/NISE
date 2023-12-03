@@ -59,52 +59,29 @@ class LetterSelectionScreen(object):
         self.font = pygame.font.Font(self.font_path, self.font_size)
         self.number_font = pygame.font.Font(self.font_path, self.number_font_size)
 
-        self.image_size = min(self.box_height // 2, self.box_width // 2)
+        image_size = min(self.box_height // 2, self.box_width // 2)
 
-        self.tick_image_path = path.join(
-            path.abspath(__file__), '..', 'materials', 'tick.png'
-        )
-        self.tick_image = pygame.image.load(self.tick_image_path)
-        self.tick_image = pygame.transform.scale(
-            self.tick_image, (self.image_size, self.image_size)
-        )
-
-        self.back_image_path = path.join(
+        back_image_path = path.join(
             path.abspath(__file__), '..', 'materials', 'backspace.png'
         )
-        self.back_image = pygame.image.load(self.back_image_path)
+        self.back_image = pygame.image.load(back_image_path)
         aspect_ratio = self.back_image.get_width() / self.back_image.get_height()
-        new_height = int(self.image_size / aspect_ratio)
+        new_height = int(image_size / aspect_ratio)
         self.back_image = pygame.transform.scale(
-            self.back_image, (self.image_size, new_height)
+            self.back_image, (image_size, new_height)
         )
 
-        self.space_image_path = path.join(
-            path.abspath(__file__), '..', 'materials', 'space.png'
-        )
-        self.space_image = pygame.image.load(self.space_image_path)
-        aspect_ratio = self.space_image.get_width() / self.space_image.get_height()
-        new_height = int(self.image_size / aspect_ratio)
-        self.space_image = pygame.transform.scale(
-            self.space_image, (self.image_size, new_height)
-        )
-
-        self.undo_image_path = path.join(
+        undo_image_path = path.join(
             path.abspath(__file__), '..', 'materials', 'undo.png'
         )
-        self.undo_image = pygame.image.load(self.undo_image_path)
+        self.undo_image = pygame.image.load(undo_image_path)
         aspect_ratio = self.undo_image.get_width() / self.undo_image.get_height()
-        new_height = int(self.image_size / aspect_ratio)
+        new_height = int(image_size / aspect_ratio)
         self.undo_image = pygame.transform.scale(
-            self.undo_image, (self.image_size, new_height)
+            self.undo_image, (image_size, new_height)
         )
 
-        self.n_presses = 0
-
         self.running = True
-
-        self.key_list = []
-        self.word_list = []
 
         self.letter_dict = {
             'A': [1, 1, 1],
@@ -172,12 +149,10 @@ class LetterSelectionScreen(object):
             '_',
         ]
 
-        self.letter_groups = self.split_letters_into_groups(self.letter_list)
-        self.letter_groups_1 = self.split_letters_into_groups(self.letter_list)
-
-        self.prev_letter_groups = self.letter_groups
-
+        self.key_list = []
+        self.word_list = []
         self.pressed_boxes = []
+        self.letter_groups = self.split_letters_into_groups(self.letter_list)
 
     def get_letter(self, keys):
         for letter, key_combo in self.letter_dict.items():
@@ -272,17 +247,10 @@ class LetterSelectionScreen(object):
                 # Ignore empty boxes
                 pass
             elif len(self.letter_groups[box_index]) != 1:
-                # Store the current letter groups in case we need to undo
-                self.prev_letter_groups = self.letter_groups
                 # Split the letters in the clicked box into four groups
                 self.letter_groups = self.split_letters_into_groups(
                     self.letter_groups[box_index]
                 )
-                # # Flatten the list and filter out any empty subgroups
-                # self.letter_list = [
-                #     letter for subgroup in self.letter_groups for letter in subgroup
-                # ]
-                self.n_presses += 1
                 self.pressed_boxes.append(box_index)
             else:
                 # If the clicked box only has one letter, add it to the word list
@@ -320,11 +288,9 @@ class LetterSelectionScreen(object):
                     '_',
                 ]
                 self.letter_groups = self.split_letters_into_groups(self.letter_list)
-                self.prev_letter_groups = self.letter_groups
-                self.n_presses = 0
                 self.pressed_boxes = []
         elif box_index == self.n_boxes - 1:
-            if self.n_presses == 0:
+            if len(self.pressed_boxes) == 0:
                 if self.word_list:
                     self.word_list.pop()
             else:
@@ -334,7 +300,6 @@ class LetterSelectionScreen(object):
 
                 self.letter_groups = tmp
                 self.pressed_boxes.pop()
-                self.n_presses -= 1
 
     def draw_image(self, rect, image, pos=None):
         # Define the vertical padding between the letter and the number
@@ -460,7 +425,7 @@ class LetterSelectionScreen(object):
 
             self.draw_boxes()
             # self.draw_circles()
-            if self.n_presses == 0:
+            if len(self.pressed_boxes) == 0:
                 self.draw_image(self.last_rect, self.back_image, pos=None)
             else:
                 self.draw_image(self.last_rect, self.undo_image, pos=None)
