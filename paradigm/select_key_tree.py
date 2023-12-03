@@ -257,7 +257,7 @@ class LetterSelectionScreen(object):
         ]
 
         # Define the vertical padding between the letter and the box
-        padding = 15
+        padding = 25
 
         for i, group in enumerate(self.letter_groups):
             # Define the x position of the box
@@ -277,7 +277,7 @@ class LetterSelectionScreen(object):
             # Center the letters vertically within each box
             for j, letter in enumerate(group):
                 # Calculate the y position for each letter to be centered in its slot
-                text_x = box_x + (self.box_width - 10) // 2
+                text_x = box_x + self.box_width / 2
                 text_y = self.box_top_margin + (j + 1) * letter_slot_heights[i]
 
                 # Render the letter
