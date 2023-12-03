@@ -154,12 +154,6 @@ class LetterSelectionScreen(object):
         self.pressed_boxes = []
         self.letter_groups = self.split_letters_into_groups(self.letter_list)
 
-    def get_letter(self, keys):
-        for letter, key_combo in self.letter_dict.items():
-            if key_combo == keys:
-                return letter
-        return ''  # Return None if no matching letter is found
-
     def split_letters_into_groups(self, letters):
         # Calculate the base size for each group
         group_size = len(letters) // (self.n_boxes - 1)
@@ -182,61 +176,6 @@ class LetterSelectionScreen(object):
             start_idx += size
 
         return groups
-
-    def draw_boxes(self):
-        letter_slot_heights = [
-            (self.box_height) / (len(group) + 1) for group in self.letter_groups
-        ]
-
-        # Define the vertical padding between the letter and the box
-        padding = 15
-
-        for i, group in enumerate(self.letter_groups):
-            # Define the x position of the box
-            box_x = self.box_padding + i * (self.box_width + self.box_padding)
-
-            # Draw the box
-            rect = pygame.Rect(
-                box_x, self.box_top_margin, self.box_width, self.box_height
-            )
-            pygame.draw.rect(self.screen, BOX_COLOR, rect)
-
-            # Draw the box index
-            number = self.number_font.render(str(i + 1), True, BLUE)
-            number_rect = number.get_rect(center=(rect.centerx, rect.bottom + padding))
-            self.screen.blit(number, number_rect.topleft)
-
-            # Center the letters vertically within each box
-            for j, letter in enumerate(group):
-                # Calculate the y position for each letter to be centered in its slot
-                text_x = box_x + (self.box_width - 10) // 2
-                text_y = self.box_top_margin + (j + 1) * letter_slot_heights[i]
-
-                # Render the letter
-                text_surface = self.font.render(letter, True, BLACK)
-                text_rect = text_surface.get_rect()
-
-                # Center the text horizontally in the box
-                text_rect.center = (text_x, text_y)
-
-                # Blit the text surface onto the screen at the calculated x, y coordinates
-                self.screen.blit(text_surface, text_rect)
-
-        # Define the x position of the box
-        box_x = self.box_padding + (i + 1) * (self.box_width + self.box_padding)
-
-        # Draw the last box
-        self.last_rect = pygame.Rect(
-            box_x, self.box_top_margin, self.box_width, self.box_height
-        )
-        pygame.draw.rect(self.screen, BOX_COLOR, self.last_rect)
-
-        # Draw the box index
-        number = self.number_font.render(str(i + 2), True, BLUE)
-        number_rect = number.get_rect(
-            center=(self.last_rect.centerx, self.last_rect.bottom + padding)
-        )
-        self.screen.blit(number, number_rect.topleft)
 
     def handle_mouse_click(self, pos):
         """Handle the mouse click event."""
@@ -301,6 +240,72 @@ class LetterSelectionScreen(object):
                 self.letter_groups = tmp
                 self.pressed_boxes.pop()
 
+    def get_letter(self, keys):
+        for letter, key_combo in self.letter_dict.items():
+            if key_combo == keys:
+                return letter
+        return ''  # Return None if no matching letter is found
+
+    def render_text(self, text, position, color=WHITE, background=None):
+        text_surface = self.font.render(text, True, color, background)
+        text_rect = text_surface.get_rect(center=position)
+        self.screen.blit(text_surface, text_rect)
+
+    def draw_boxes(self):
+        letter_slot_heights = [
+            (self.box_height) / (len(group) + 1) for group in self.letter_groups
+        ]
+
+        # Define the vertical padding between the letter and the box
+        padding = 15
+
+        for i, group in enumerate(self.letter_groups):
+            # Define the x position of the box
+            box_x = self.box_padding + i * (self.box_width + self.box_padding)
+
+            # Draw the box
+            rect = pygame.Rect(
+                box_x, self.box_top_margin, self.box_width, self.box_height
+            )
+            pygame.draw.rect(self.screen, BOX_COLOR, rect)
+
+            # Draw the box index
+            number = self.number_font.render(str(i + 1), True, BLUE)
+            number_rect = number.get_rect(center=(rect.centerx, rect.bottom + padding))
+            self.screen.blit(number, number_rect.topleft)
+
+            # Center the letters vertically within each box
+            for j, letter in enumerate(group):
+                # Calculate the y position for each letter to be centered in its slot
+                text_x = box_x + (self.box_width - 10) // 2
+                text_y = self.box_top_margin + (j + 1) * letter_slot_heights[i]
+
+                # Render the letter
+                text_surface = self.font.render(letter, True, BLACK)
+                text_rect = text_surface.get_rect()
+
+                # Center the text horizontally in the box
+                text_rect.center = (text_x, text_y)
+
+                # Blit the text surface onto the screen at the calculated x, y coordinates
+                self.screen.blit(text_surface, text_rect)
+
+        # Define the x position of the box
+        box_x = self.box_padding + (i + 1) * (self.box_width + self.box_padding)
+
+        # Draw the last box
+        self.last_rect = pygame.Rect(
+            box_x, self.box_top_margin, self.box_width, self.box_height
+        )
+        pygame.draw.rect(self.screen, BOX_COLOR, self.last_rect)
+
+        # Draw the box index
+        number = self.number_font.render(str(i + 2), True, BLUE)
+        number_rect = number.get_rect(
+            center=(self.last_rect.centerx, self.last_rect.bottom + padding)
+        )
+        self.screen.blit(number, number_rect.topleft)
+
     def draw_image(self, rect, image, pos=None):
         # Define the vertical padding between the letter and the number
         padding = 15
@@ -334,11 +339,6 @@ class LetterSelectionScreen(object):
         # Blit the image onto the screen
         self.screen.blit(image, image_rect.topleft)
         self.screen.blit(number, number_rect.topleft)
-
-    def render_text(self, text, position, color=WHITE, background=None):
-        text_surface = self.font.render(text, True, color, background)
-        text_rect = text_surface.get_rect(center=position)
-        self.screen.blit(text_surface, text_rect)
 
     def draw_circles(self):
         for i, position in enumerate(self.circle_positions):
