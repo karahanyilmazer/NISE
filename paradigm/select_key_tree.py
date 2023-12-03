@@ -172,6 +172,11 @@ class LetterSelectionScreen(object):
         ]
 
         self.letter_groups = self.split_letters_into_groups(self.letter_list)
+        self.letter_groups_1 = self.split_letters_into_groups(self.letter_list)
+
+        self.prev_letter_groups = self.letter_groups
+
+        self.pressed_boxes = []
 
     def get_letter(self, keys):
         for letter, key_combo in self.letter_dict.items():
@@ -179,92 +184,15 @@ class LetterSelectionScreen(object):
                 return letter
         return ''  # Return None if no matching letter is found
 
-    def draw_cell(self, screen, rect, idx):
-        letter_list = [
-            'A',
-            'B',
-            'C',
-            'D',
-            'E',
-            'F',
-            'G',
-            'H',
-            'I',
-            'J',
-            'K',
-            'L',
-            'M',
-            'N',
-            'O',
-            'P',
-            'Q',
-            'R',
-            'S',
-            'T',
-            'U',
-            'V',
-            'W',
-            'X',
-            'Y',
-            'Z',
-            '.',
-            '?',
-            '_',
-            ' ',
-            ' ',
-            ' ',
-        ]
-
-        # Define the vertical padding between the letter and the number
-        padding = 15
-
-        # Calculate the center for the entire cell content (letters and numbers)
-        cell_content_center = rect.centerx, rect.centery - self.number_font_size // 3
-
-        # Draw the first letter and its index
-        letter_1 = letter_list[idx]
-        text_1 = self.font.render(letter_1, True, BLACK)
-        text_1_rect = text_1.get_rect(
-            center=(
-                cell_content_center[0] - self.col_width // 4,
-                cell_content_center[1],
-            )
-        )
-
-        number_1 = self.number_font.render('1', True, BLUE)
-        number_1_rect = number_1.get_rect(
-            center=(text_1_rect.centerx, text_1_rect.bottom + padding)
-        )
-
-        # Draw the second letter and its index
-        letter_2 = letter_list[idx + 1]
-        text_2 = self.font.render(letter_2, True, BLACK)
-        text_2_rect = text_2.get_rect(
-            center=(
-                cell_content_center[0] + self.col_width // 4,
-                cell_content_center[1],
-            )
-        )
-
-        number_2 = self.number_font.render('2', True, BLUE)
-        number_2_rect = number_2.get_rect(
-            center=(text_2_rect.centerx, text_2_rect.bottom + padding)
-        )
-
-        # Display the letters and numbers
-        screen.blit(text_1, text_1_rect.topleft)
-        screen.blit(number_1, number_1_rect.topleft)
-        screen.blit(text_2, text_2_rect.topleft)
-        screen.blit(number_2, number_2_rect.topleft)
-
     def split_letters_into_groups(self, letters):
         # Calculate the base size for each group
         group_size = len(letters) // (self.n_boxes - 1)
+
         # Initialize a list to hold all groups
         groups = []
 
         # Calculate the number of groups that will have an extra letter
-        extra_letter_groups = len(letters) % self.n_boxes
+        extra_letter_groups = len(letters) % (self.n_boxes - 1)
 
         # Start index for slicing letters
         start_idx = 0
@@ -334,14 +262,18 @@ class LetterSelectionScreen(object):
                 # Ignore empty boxes
                 pass
             elif len(self.letter_groups[box_index]) != 1:
+                # Store the current letter groups in case we need to undo
+                self.prev_letter_groups = self.letter_groups
                 # Split the letters in the clicked box into four groups
                 self.letter_groups = self.split_letters_into_groups(
                     self.letter_groups[box_index]
                 )
-                # Flatten the list and filter out any empty subgroups
-                self.letter_list = [
-                    letter for subgroup in self.letter_groups for letter in subgroup
-                ]
+                # # Flatten the list and filter out any empty subgroups
+                # self.letter_list = [
+                #     letter for subgroup in self.letter_groups for letter in subgroup
+                # ]
+                self.n_presses += 1
+                self.pressed_boxes.append(box_index)
             else:
                 # If the clicked box only has one letter, add it to the word list
                 self.word_list.append(self.letter_groups[box_index][0])
@@ -378,6 +310,21 @@ class LetterSelectionScreen(object):
                     '_',
                 ]
                 self.letter_groups = self.split_letters_into_groups(self.letter_list)
+                self.prev_letter_groups = self.letter_groups
+                self.n_presses = 0
+                self.pressed_boxes = []
+        elif box_index == self.n_boxes - 1:
+            if self.n_presses == 0:
+                if self.word_list:
+                    self.word_list.pop()
+            else:
+                tmp = self.split_letters_into_groups(self.letter_list)
+                for i in range(len(self.pressed_boxes) - 1):
+                    tmp = self.split_letters_into_groups(tmp[self.pressed_boxes[i]])
+
+                self.letter_groups = tmp
+                self.pressed_boxes.pop()
+                self.n_presses -= 1
 
     def draw_image(self, rect, image, pos=None):
         # Define the vertical padding between the letter and the number
