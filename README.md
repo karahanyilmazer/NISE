@@ -15,23 +15,29 @@ fostering a social environment within the rehabilitation setting.
 
 
 ## Encoder
-The circuit design for the machine encoder is depicted in Figure~\ref{fig:sender}. 
+The circuit design for the machine encoder is depicted in Figure ![Sender](figures/Sender.png). 
 It employs an ESP32 microcontroller that receives input from four highly reliable force sensors integrated into a glove. 
 The determination of whether a sensor is pressed or not is made using a threshold value. Upon sensing a press, 
 the sensor sends a corresponding number to a communication script written in Python. Each received number is then relayed to the graphical user interface. 
 The interface displays a letter when three numbers are received, effectively translating the sensor inputs into a meaningful message.
 
-<p align="center">
-  <img src="figures/Sender.png" alt="Figure 1: Circuit design of the machine encoder" width="300">
-</p>
-
 <div align="center">
-  <img src="figures/Sender.png" alt="Figure 1: Sender" width="300">
+  <img src="figures/Sender.png" alt="Sender" width="300">
   <p>Figure 1: Circuit design of the machine encoder</p>
 </div>
+
 ## Decoder
 
+The circuit design for the machine decoder is depicted in Figure 2. In this setup, four vibrotactile motors are employed to convey messages received. The ESP32 microcontroller, connected via WiFi, receives a message consisting of three numbers from the encoder side. For each number received, the corresponding motor vibrates for 500 ms and then pauses for 250 ms. Upon receiving a single letter, the user can utilize a push button integrated into the circuit to access the next letter. This push button functionality enhances the participant's ability to distinguish between different messages and decode them more accurately. Consequently, it contributes to the creation of a more reliable communication system.
+
+<div align="center">
+  <img src="figures/Receiver.png" alt="Figure 1: Receiver" width="300">
+  <p>Figure 2: Circuit design of the machine decoder</p>
+</div>
+
 ## User Interface
+
+The user interface is structured as a 4x4 grid, comprising 16 blocks, each housing two symbols. It includes all English letters, a dot, a question mark, a space, and a backspace option. Symbol selection involves a three-step process: the sender first chooses the column containing the desired symbol and then selects the specific row containing the symbol of interest. The final decision on the symbol is determined by the last number, which is either 1 or 2. In the case of an erroneous selection, the backspace symbol can be employed to delete the incorrect letter. All transmitted letters are displayed in the upper black segment of Figure~\ref{fig:GUI}.
 
 ## Communication Between Systems
 
