@@ -24,6 +24,11 @@ The interface displays a letter when three numbers are received, effectively tra
 <p align="center">
   <img src="figures/Sender.png" alt="Figure 1: Circuit design of the machine encoder" width="300">
 </p>
+
+<div align="center">
+  <img src="figures/Sender.png" alt="Figure 1: Sender" width="300">
+  <p>Figure 1: Circuit design of the machine encoder</p>
+</div>
 ## Decoder
 
 ## User Interface
