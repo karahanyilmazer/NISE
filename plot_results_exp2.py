@@ -145,14 +145,15 @@ plt.fill_between(
     alpha=0.2,
 )
 
-plt.plot(mean_time_decoder, '-o', label='Decoder Speed', color=def_colors[1])
-plt.fill_between(
-    mean_time_decoder.index,
-    mean_time_decoder - std_time_decoder,
-    mean_time_decoder + std_time_decoder,
-    color=def_colors[1],
-    alpha=0.2,
-)
+
+# plt.plot(mean_time_decoder, '-o', label='Decoder Speed', color=def_colors[1])
+# plt.fill_between(
+#     mean_time_decoder.index,
+#     mean_time_decoder - std_time_decoder,
+#     mean_time_decoder + std_time_decoder,
+#     color=def_colors[1],
+#     alpha=0.2,
+# )
 
 plt.title('Experiment 1 - Sent & Received Letters')
 plt.xlabel('Trial')
