@@ -13,7 +13,8 @@ LIGHT_BLUE = (173, 216, 230)
 LIGHT_GREEN = (114, 232, 114)
 LIGHT_GREY = (211, 211, 211)
 VERY_LIGHT_GREY = (220, 220, 220)
-BOX_COLOR = (173, 216, 230)  # Light blue color
+BONE = (230, 227, 202)
+BOX_COLOR = BONE
 
 
 class LetterSelectionScreen(object):
