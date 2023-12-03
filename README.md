@@ -57,7 +57,7 @@ The communication between the encoder circuit and the communication script is es
 
 Overall System design can be seen in figure 4. The programming language and communication between subsystems are indicated in the figure.
 
-The user should start by running the bmi_wifi_delay.py function since it serves as the sender in the communication process. Afterward, the select_key_delay.py function should be executed, leading to the appearance of a user interface on the screen.
+The user should start by running the bmi_wifi_delay.py function since it serves as the sender in the communication process. Afterward, the paradigm/select_key_delay.py function should be executed, leading to the appearance of a user interface on the screen.
 
 The vibrotactile motors will vibrate based on the force sensor pressed. For the machine encoder circuit, you can find the Arduino code in 'NISE/esp32/force_sensor/force_sensor.ino'. 
 Similarly, the code for the machine decoder circuit can be found in 'NISE/esp32/vibro_multi/vibro_wifi.ino'.
