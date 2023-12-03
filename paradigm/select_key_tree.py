@@ -2,10 +2,17 @@
 import sys
 import time
 from os import path
-
+import socket
+import csv
 import pygame
 
 # %%
+
+curr_path = path.os.getcwd()
+data_path = r'/home/muhammed/Desktop/NISE/csv_data'
+path.os.chdir(data_path)
+run_num = sum("run_encoder" in f_name for f_name in path.os.listdir()) + 1
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 BLUE = (37, 122, 196)
@@ -20,13 +27,14 @@ BOX_COLOR = BONE
 class LetterSelectionScreen(object):
     def __init__(self):
         pygame.init()
-        self.font_path = path.join(
-            path.abspath(__file__), '..', 'materials', 'EsseGrotesk.otf'
-        )
-        self.font_size = 36
+        current_dir = path.dirname(path.abspath(__file__))
+
+        # Construct the path to the font file
+        self.font_path = path.join(current_dir, 'materials', 'EsseGrotesk.otf')
+        self.font_size = 50
         self.number_font_size = self.font_size // 2
 
-        self.screen_width, self.screen_height = 1400, 600
+        self.screen_width, self.screen_height = 2000, 1600
 
         self.header_height = 60  # Height of the header space to display selected keys
         # Increase overall screen height to accommodate the header
@@ -61,9 +69,7 @@ class LetterSelectionScreen(object):
 
         image_size = min(self.box_height // 2, self.box_width // 2)
 
-        back_image_path = path.join(
-            path.abspath(__file__), '..', 'materials', 'backspace.png'
-        )
+        back_image_path = path.join(current_dir, 'materials', 'backspace.png')
         self.back_image = pygame.image.load(back_image_path)
         aspect_ratio = self.back_image.get_width() / self.back_image.get_height()
         new_height = int(image_size / aspect_ratio)
@@ -71,9 +77,7 @@ class LetterSelectionScreen(object):
             self.back_image, (image_size, new_height)
         )
 
-        undo_image_path = path.join(
-            path.abspath(__file__), '..', 'materials', 'undo.png'
-        )
+        undo_image_path = path.join(current_dir, 'materials', 'undo.png')
         self.undo_image = pygame.image.load(undo_image_path)
         aspect_ratio = self.undo_image.get_width() / self.undo_image.get_height()
         new_height = int(image_size / aspect_ratio)
@@ -177,10 +181,16 @@ class LetterSelectionScreen(object):
 
         return groups
 
-    def handle_mouse_click(self, pos):
+    def get_box_idx_from_mouse(self, pos):
         """Handle the mouse click event."""
         # Determine which box has been clicked
         box_index = int(pos[0] // (self.box_width + self.box_padding))
+
+        return box_index
+
+
+    def select_box(self, box_index):
+
         if box_index < len(self.letter_groups):
             if len(self.letter_groups[box_index]) == 0:
                 # Ignore empty boxes
@@ -350,32 +360,38 @@ class LetterSelectionScreen(object):
                 pygame.draw.circle(self.screen, LIGHT_GREEN, position, 10, 2)
 
     def run(self):
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host = '127.0.0.1'  # Change this to the IP address of your server
+        port = 12345  # Choose the same port number as in the server
+
+        client_socket.connect((host, port))
+
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
 
-                elif event.type == pygame.VIDEORESIZE:
-                    # The window has been resized, so resize the grid
-                    self.screen_width, self.screen_height = event.size
-                    self.screen = pygame.display.set_mode(
-                        (self.screen_width, self.screen_height), pygame.RESIZABLE
-                    )
-
-                    self.index_row_height = (
-                        self.screen_height - self.header_height
-                    ) // (2 * self.n_rows - 1)
-                    self.row_height = (
-                        2
-                        * (self.screen_height - self.header_height)
-                        // (2 * self.n_rows - 1)
-                    )
-
-                    self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
-                    self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
+                #elif event.type == pygame.VIDEORESIZE:
+                #    # The window has been resized, so resize the grid
+                #    self.screen_width, self.screen_height = event.size
+                #    self.screen = pygame.display.set_mode(
+                #        (self.screen_width, self.screen_height), pygame.RESIZABLE
+                #    )
+#
+                #    self.index_row_height = (
+                #        self.screen_height - self.header_height
+                #    ) // (2 * self.n_rows - 1)
+                #    self.row_height = (
+                #        2
+                #        * (self.screen_height - self.header_height)
+                #        // (2 * self.n_rows - 1)
+                #    )
+#
+                #    self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
+                #    self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.handle_mouse_click(event.pos)
+                    box_idx = self.get_box_idx_from_mouse(event.pos)
 
                 elif event.type == pygame.KEYDOWN:
                     if event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]:
@@ -402,12 +418,11 @@ class LetterSelectionScreen(object):
                     elif event.key == pygame.K_ESCAPE:
                         self.running = False
 
-            # Check if we are selecting a row or column
-            if len(self.key_list) in (0, 2):
-                self.selecting_col = True
-            elif len(self.key_list) == 1:
-                self.selecting_col = False
+            data_from_server = client_socket.recv(4)
+            box_index = int.from_bytes(data_from_server, byteorder='big')
 
+            self.select_box(box_index)
+            
             # Clear the screen
             self.screen.fill(WHITE)
             # Draw the header background
