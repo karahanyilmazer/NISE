@@ -342,16 +342,12 @@ class LetterSelectionScreen(object):
 
     def draw_circles(self):
         for i, position in enumerate(self.circle_positions):
-            if i < len(self.key_list):
+            if i < len(self.pressed_boxes):
                 # Draw filled circle
                 pygame.draw.circle(self.screen, LIGHT_GREEN, position, 10)
-                if i == 2:
-                    pygame.draw.circle(self.screen, BLUE, position, 10)
             else:
                 # Draw hollow circle
                 pygame.draw.circle(self.screen, LIGHT_GREEN, position, 10, 2)
-                if i == 2:
-                    pygame.draw.circle(self.screen, BLUE, position, 10, 2)
 
     def run(self):
         while self.running:
@@ -424,7 +420,7 @@ class LetterSelectionScreen(object):
             )
 
             self.draw_boxes()
-            # self.draw_circles()
+            self.draw_circles()
             if len(self.pressed_boxes) == 0:
                 self.draw_image(self.last_rect, self.back_image, pos=None)
             else:
