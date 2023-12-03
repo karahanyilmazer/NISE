@@ -212,21 +212,23 @@ class LetterSelectionScreen(object):
             (self.box_height) / (len(group) + 1) for group in self.letter_groups
         ]
 
+        # Define the vertical padding between the letter and the box
+        padding = 15
+
         for i, group in enumerate(self.letter_groups):
             # Define the x position of the box
             box_x = self.box_padding + i * (self.box_width + self.box_padding)
 
             # Draw the box
-            pygame.draw.rect(
-                self.screen,
-                BOX_COLOR,
-                (
-                    box_x,
-                    self.box_top_margin,
-                    self.box_width,
-                    self.box_height,
-                ),
+            rect = pygame.Rect(
+                box_x, self.box_top_margin, self.box_width, self.box_height
             )
+            pygame.draw.rect(self.screen, BOX_COLOR, rect)
+
+            # Draw the box index
+            number = self.number_font.render(str(i + 1), True, BLUE)
+            number_rect = number.get_rect(center=(rect.centerx, rect.bottom + padding))
+            self.screen.blit(number, number_rect.topleft)
 
             # Center the letters vertically within each box
             for j, letter in enumerate(group):
@@ -247,11 +249,18 @@ class LetterSelectionScreen(object):
         # Define the x position of the box
         box_x = self.box_padding + (i + 1) * (self.box_width + self.box_padding)
 
+        # Draw the last box
         self.last_rect = pygame.Rect(
             box_x, self.box_top_margin, self.box_width, self.box_height
         )
-
         pygame.draw.rect(self.screen, BOX_COLOR, self.last_rect)
+
+        # Draw the box index
+        number = self.number_font.render(str(i + 2), True, BLUE)
+        number_rect = number.get_rect(
+            center=(self.last_rect.centerx, self.last_rect.bottom + padding)
+        )
+        self.screen.blit(number, number_rect.topleft)
 
     def handle_mouse_click(self, pos):
         """Handle the mouse click event."""
@@ -449,7 +458,7 @@ class LetterSelectionScreen(object):
             )
 
             self.draw_boxes()
-            self.draw_circles()
+            # self.draw_circles()
             if self.n_presses == 0:
                 self.draw_image(self.last_rect, self.back_image, pos=None)
             else:
@@ -464,3 +473,5 @@ class LetterSelectionScreen(object):
 if __name__ == "__main__":
     game = LetterSelectionScreen()
     game.run()
+
+# %%
