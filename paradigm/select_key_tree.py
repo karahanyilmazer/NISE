@@ -88,6 +88,18 @@ class LetterSelectionScreen(object):
             self.space_image, (self.image_size, new_height)
         )
 
+        self.undo_image_path = path.join(
+            path.abspath(__file__), '..', 'materials', 'undo.png'
+        )
+        self.undo_image = pygame.image.load(self.undo_image_path)
+        aspect_ratio = self.undo_image.get_width() / self.undo_image.get_height()
+        new_height = int(self.image_size / aspect_ratio)
+        self.undo_image = pygame.transform.scale(
+            self.undo_image, (self.image_size, new_height)
+        )
+
+        self.n_presses = 0
+
         self.running = True
 
         self.key_list = []
@@ -247,7 +259,7 @@ class LetterSelectionScreen(object):
 
     def split_letters_into_groups(self, letters):
         # Calculate the base size for each group
-        group_size = len(letters) // self.n_boxes
+        group_size = len(letters) // (self.n_boxes - 1)
         # Initialize a list to hold all groups
         groups = []
 
@@ -257,7 +269,7 @@ class LetterSelectionScreen(object):
         # Start index for slicing letters
         start_idx = 0
 
-        for i in range(self.n_boxes):
+        for i in range(self.n_boxes - 1):
             # If there are still extra letters to distribute, add one more letter to the group
             size = group_size + (1 if i < extra_letter_groups else 0)
             # Slice the letters to create a new group and append to the groups list
@@ -304,11 +316,19 @@ class LetterSelectionScreen(object):
                 # Blit the text surface onto the screen at the calculated x, y coordinates
                 self.screen.blit(text_surface, text_rect)
 
+        # Define the x position of the box
+        box_x = self.box_padding + (i + 1) * (self.box_width + self.box_padding)
+
+        self.last_rect = pygame.Rect(
+            box_x, self.box_top_margin, self.box_width, self.box_height
+        )
+
+        pygame.draw.rect(self.screen, BOX_COLOR, self.last_rect)
+
     def handle_mouse_click(self, pos):
         """Handle the mouse click event."""
         # Determine which box has been clicked
         box_index = int(pos[0] // (self.box_width + self.box_padding))
-        print(len(self.letter_groups[box_index]))
         if box_index < len(self.letter_groups):
             if len(self.letter_groups[box_index]) == 0:
                 # Ignore empty boxes
@@ -480,10 +500,13 @@ class LetterSelectionScreen(object):
                 ''.join(self.word_list),
                 (self.screen_width // 2, self.header_height // 2),
             )
-            # self.draw_grid(self.n_rows, self.n_cols)
-            # self.draw_grid_lines(self.n_rows, self.n_cols, VERY_LIGHT_GREY)
+
             self.draw_boxes()
             self.draw_circles()
+            if self.n_presses == 0:
+                self.draw_image(self.last_rect, self.back_image, pos=None)
+            else:
+                self.draw_image(self.last_rect, self.undo_image, pos=None)
 
             pygame.display.flip()
 
