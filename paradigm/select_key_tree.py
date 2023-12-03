@@ -1,11 +1,12 @@
 # %%
+import csv
 import os
+import socket
 import sys
 import time
-from os import path
-import socket
-import csv
 from datetime import datetime
+from os import path
+
 import pygame
 
 # %%
@@ -191,9 +192,7 @@ class LetterSelectionScreen(object):
 
         return box_index
 
-
     def select_box(self, box_index):
-
         if box_index < len(self.letter_groups):
             if len(self.letter_groups[box_index]) == 0:
                 # Ignore empty boxes
@@ -379,13 +378,13 @@ class LetterSelectionScreen(object):
                 if event.type == pygame.QUIT:
                     self.running = False
 
-                #elif event.type == pygame.VIDEORESIZE:
+                # elif event.type == pygame.VIDEORESIZE:
                 #    # The window has been resized, so resize the grid
                 #    self.screen_width, self.screen_height = event.size
                 #    self.screen = pygame.display.set_mode(
                 #        (self.screen_width, self.screen_height), pygame.RESIZABLE
                 #    )
-#
+                #
                 #    self.index_row_height = (
                 #        self.screen_height - self.header_height
                 #    ) // (2 * self.n_rows - 1)
@@ -394,7 +393,7 @@ class LetterSelectionScreen(object):
                 #        * (self.screen_height - self.header_height)
                 #        // (2 * self.n_rows - 1)
                 #    )
-#
+                #
                 #    self.index_col_width = self.screen_width // (2 * self.n_cols - 1)
                 #    self.col_width = 2 * self.screen_width // (2 * self.n_cols - 1)
 
@@ -427,10 +426,10 @@ class LetterSelectionScreen(object):
                         self.running = False
 
             data_from_server = client_socket.recv(4)
-            box_index = int.from_bytes(data_from_server, byteorder='big') -1
+            box_index = int.from_bytes(data_from_server, byteorder='big') - 1
 
             self.select_box(box_index)
-            
+
             # Clear the screen
             self.screen.fill(WHITE)
             # Draw the header background
@@ -450,7 +449,6 @@ class LetterSelectionScreen(object):
                 self.draw_image(self.last_rect, self.undo_image, pos=None)
 
             pygame.display.flip()
-
 
         with open(f'run_encoder_{run_num}.csv', 'w', newline='') as file:
             writer = csv.writer(file)
