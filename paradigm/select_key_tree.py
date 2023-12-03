@@ -1,17 +1,19 @@
 # %%
+import os
 import sys
 import time
 from os import path
 import socket
 import csv
+from datetime import datetime
 import pygame
 
 # %%
 
 curr_path = path.os.getcwd()
-data_path = r'/home/muhammed/Desktop/NISE/csv_data'
+data_path = r'/home/muhammed/Desktop/NISE/csv_data/sender'
 path.os.chdir(data_path)
-run_num = sum("run_encoder" in f_name for f_name in path.os.listdir()) + 1
+run_num = sum("run_tree" in f_name for f_name in path.os.listdir()) + 1
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -153,6 +155,7 @@ class LetterSelectionScreen(object):
             '_',
         ]
 
+        self.csv_list = []
         self.key_list = []
         self.word_list = []
         self.pressed_boxes = []
@@ -202,8 +205,13 @@ class LetterSelectionScreen(object):
                 )
                 self.pressed_boxes.append(box_index)
             else:
+                letter = self.letter_groups[box_index][0]
+                # Send the command over the socket connection
+                print_str = (self.key_list, letter, datetime.now())
+                self.csv_list.append(print_str)
+                print(print_str)
                 # If the clicked box only has one letter, add it to the word list
-                self.word_list.append(self.letter_groups[box_index][0])
+                self.word_list.append(letter)
                 # Reset the letter groups
                 self.letter_list = [
                     'A',
@@ -362,7 +370,7 @@ class LetterSelectionScreen(object):
     def run(self):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host = '127.0.0.1'  # Change this to the IP address of your server
-        port = 12345  # Choose the same port number as in the server
+        port = 12348  # Choose the same port number as in the server
 
         client_socket.connect((host, port))
 
@@ -419,7 +427,7 @@ class LetterSelectionScreen(object):
                         self.running = False
 
             data_from_server = client_socket.recv(4)
-            box_index = int.from_bytes(data_from_server, byteorder='big')
+            box_index = int.from_bytes(data_from_server, byteorder='big') -1
 
             self.select_box(box_index)
             
@@ -442,6 +450,13 @@ class LetterSelectionScreen(object):
                 self.draw_image(self.last_rect, self.undo_image, pos=None)
 
             pygame.display.flip()
+
+
+        with open(f'run_encoder_{run_num}.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(self.csv_list)
+
+        os.chdir(curr_path)
 
         pygame.quit()
         sys.exit()
