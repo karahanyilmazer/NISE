@@ -120,7 +120,7 @@ df = pd.DataFrame(
 ax = sns.barplot(data=df)
 
 # File paths to your images in the folder (replace these with your image file paths)
-image_paths = ['conf_1.png', 'conf_2.png', 'conf_3.png']
+image_paths = ['conf_4.png', 'conf_5.png', 'conf_6.png']
 
 ax.set_xticks(range(len(image_paths)))
 ax.set_xticklabels(['', '', ''])
@@ -128,13 +128,13 @@ ax.set_xticklabels(['', '', ''])
 # Load images and set them as x-axis tick labels
 for i, path in enumerate(image_paths):
     img = plt.imread(os.path.join('figures', path))  # Check folder structure
-    img = OffsetImage(img, zoom=0.3)
+    img = OffsetImage(img, zoom=0.1)
     img.image.axes = ax
 
     ab = AnnotationBbox(
         img,
         (i, 0),
-        xybox=(0.0, -45.0),
+        xybox=(0.0, -37.0),
         frameon=False,
         xycoords='data',
         boxcoords="offset points",
